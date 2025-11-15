@@ -1,0 +1,14 @@
+prometheus:
+  prometheusSpec:
+    retention: 30d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: ""
+          accessModes: ["ReadWriteMany"]
+          resources:
+            requests:
+              storage: 50Gi
+          selector:
+            matchLabels:
+              app: prometheus-storage
