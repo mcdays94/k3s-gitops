@@ -100,6 +100,11 @@ data:
             href: https://10.10.10.1
             description: Network Gateway
             ping: https://10.10.10.1
+        - Proxmox:
+            icon: proxmox
+            href: https://10.10.10.96:8006
+            description: Virtualization Platform
+            ping: https://10.10.10.96:8006
         - Personal Blog:
             icon: mdi-post
             href: https://mdias.info
