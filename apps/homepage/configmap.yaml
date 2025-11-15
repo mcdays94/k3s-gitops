@@ -118,6 +118,8 @@ data:
             widget:
               type: unifi
               url: https://10.10.10.1
+              username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
+              password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
         - Proxmox:
             icon: proxmox
             href: https://10.10.10.96:8006

@@ -66,6 +66,16 @@ spec:
             secretKeyRef:
               name: adguard-creds
               key: pi4-password
+        - name: HOMEPAGE_VAR_UNIFI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: unifi-creds
+              key: username
+        - name: HOMEPAGE_VAR_UNIFI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: unifi-creds
+              key: password
         volumeMounts:
         - name: config
           mountPath: /app/config
