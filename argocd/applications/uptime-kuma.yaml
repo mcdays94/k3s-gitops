@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_USERNAME/k3s-gitops  # UPDATE THIS!
+    repoURL: https://github.com/mcdays94/k3s-gitops
     targetRevision: main
     path: apps/uptime-kuma
   destination:
