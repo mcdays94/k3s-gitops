@@ -129,5 +129,6 @@ data:
               href: https://github.com/mcdays94/k3s-gitops/blob/main/GITOPS-WORKFLOW.md
 
   docker.yaml: ""
+  proxmox.yaml: ""
   kubernetes.yaml: |
     mode: cluster
