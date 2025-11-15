@@ -21,9 +21,12 @@ data:
       - Monitoring:
           style: row
           columns: 3
+      - Docker Hosts:
+          style: row
+          columns: 2
       - External Services:
           style: row
-          columns: 3
+          columns: 4
 
   services.yaml: |
     - Cluster Services:
@@ -77,12 +80,29 @@ data:
             description: Metrics Collection
             ping: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 
+    - Docker Hosts:
+        - Portainer (Pi4):
+            icon: portainer.png
+            href: https://10.10.10.23:9443
+            description: Pi4 Docker Management
+            ping: https://10.10.10.23:9443
+        - Portainer (Ubuntu VM):
+            icon: portainer.png
+            href: https://10.10.10.79:9443
+            description: Proxmox VM Docker Management
+            ping: https://10.10.10.79:9443
+
     - External Services:
         - Homepage:
             icon: homepage.png
             href: http://10.10.10.208
             description: Homelab Dashboard
             ping: http://homepage.homepage.svc.cluster.local
+        - Home Assistant:
+            icon: home-assistant.png
+            href: http://10.10.10.189:8123
+            description: Home Automation
+            ping: http://10.10.10.189:8123
         - UniFi Gateway:
             icon: unifi.png
             href: https://10.10.10.1
