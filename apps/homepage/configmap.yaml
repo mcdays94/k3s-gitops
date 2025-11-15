@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: Homelab Dashboard
+    theme: dark
+    color: slate
+    headerStyle: boxed
+    layout:
+      - Cluster Services:
+          style: row
+          columns: 3
+      - Infrastructure:
+          style: row
+          columns: 3
+      - Monitoring:
+          style: row
+          columns: 3
+      - External Services:
+          style: row
+          columns: 3
+
+  services.yaml: |
+    - Cluster Services:
+        - Portainer:
+            icon: portainer.png
+            href: http://10.10.10.200:9000
+            description: Kubernetes Management
+            ping: http://10.10.10.200:9000
+        - ArgoCD:
+            icon: argocd.png
+            href: http://10.10.10.204
+            description: GitOps Continuous Deployment
+            ping: http://10.10.10.204
+        - pgAdmin:
+            icon: pgadmin.png
+            href: http://10.10.10.203
+            description: PostgreSQL Management
+            ping: http://10.10.10.203
+
+    - Infrastructure:
+        - AdGuard Home (K3s):
+            icon: adguard-home.png
+            href: http://10.10.10.207
+            description: DNS Filtering (Cluster)
+            ping: http://10.10.10.207
+        - AdGuard Home (Origin):
+            icon: adguard-home.png
+            href: http://10.10.10.79
+            description: DNS Filtering (Origin)
+            ping: http://10.10.10.79
+        - AdGuard Home (Pi4):
+            icon: adguard-home.png
+            href: http://10.10.10.24
+            description: DNS Filtering (Pi4)
+            ping: http://10.10.10.24
+
+    - Monitoring:
+        - Grafana:
+            icon: grafana.png
+            href: http://10.10.10.201
+            description: Metrics & Dashboards
+            ping: http://10.10.10.201
+        - Uptime Kuma:
+            icon: uptime-kuma.png
+            href: http://10.10.10.202:3001
+            description: Service Monitoring
+            ping: http://10.10.10.202:3001
+        - Prometheus:
+            icon: prometheus.png
+            href: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+            description: Metrics Collection
+            ping: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+
+    - External Services:
+        - PostgreSQL VM:
+            icon: postgresql.png
+            href: http://10.10.10.70
+            description: External Database
+            ping: 10.10.10.70
+        - Proxmox:
+            icon: proxmox.png
+            href: https://YOUR_PROXMOX_IP:8006
+            description: Virtualization Platform
+        - UniFi Controller:
+            icon: unifi.png
+            href: https://YOUR_UNIFI_IP
+            description: Network Management
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "K3s Cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+
+    - resources:
+        backend: kubernetes
+        expanded: true
+        cpu: true
+        memory: true
+
+    - search:
+        provider: google
+        target: _blank
+
+  bookmarks.yaml: |
+    - Documentation:
+        - GitHub Repo:
+            - icon: github.png
+              href: https://github.com/mcdays94/k3s-gitops
+        - Operations Guide:
+            - icon: mdi-file-document
+              href: https://github.com/mcdays94/k3s-gitops/blob/main/OPERATIONS.md
+        - GitOps Workflow:
+            - icon: mdi-file-document
+              href: https://github.com/mcdays94/k3s-gitops/blob/main/GITOPS-WORKFLOW.md
+
+  docker.yaml: ""
+  kubernetes.yaml: |
+    mode: cluster
