@@ -18,5 +18,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-  # This must be synced BEFORE kube-prometheus-stack
-  syncWave: -1
