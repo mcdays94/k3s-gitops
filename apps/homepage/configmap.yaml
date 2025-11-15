@@ -34,24 +34,20 @@ data:
             icon: portainer.png
             href: http://10.10.10.200:9000
             description: Kubernetes Management
-            ping: http://portainer.portainer.svc.cluster.local:9000
         - ArgoCD:
             icon: argocd.png
             href: http://10.10.10.204
             description: GitOps Continuous Deployment
-            ping: http://argocd-server.argocd.svc.cluster.local
         - pgAdmin:
             icon: pgadmin.png
             href: http://10.10.10.203
             description: PostgreSQL Management
-            ping: http://pgadmin.pgadmin.svc.cluster.local
 
     - Infrastructure:
         - AdGuard Home (K3s):
             icon: adguard-home.png
             href: http://10.10.10.207
             description: DNS Filtering (Cluster)
-            ping: http://adguard-home-web.adguard-home.svc.cluster.local
         - AdGuard Home (Origin):
             icon: adguard-home.png
             href: http://10.10.10.79
@@ -68,17 +64,14 @@ data:
             icon: grafana.png
             href: http://10.10.10.201
             description: Metrics & Dashboards
-            ping: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
         - Uptime Kuma:
             icon: uptime-kuma.png
             href: http://10.10.10.202:3001
             description: Service Monitoring
-            ping: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
         - Prometheus:
             icon: prometheus.png
             href: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
             description: Metrics Collection
-            ping: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 
     - Docker Hosts:
         - Portainer (Pi4):
@@ -97,7 +90,6 @@ data:
             icon: homepage.png
             href: http://10.10.10.208
             description: Homelab Dashboard
-            ping: http://homepage.homepage.svc.cluster.local
         - Home Assistant:
             icon: home-assistant.png
             href: http://10.10.10.189:8123
@@ -108,10 +100,6 @@ data:
             href: https://10.10.10.1
             description: Network Gateway
             ping: https://10.10.10.1
-        - PostgreSQL VM:
-            icon: postgresql.png
-            href: http://10.10.10.70:5432
-            description: External Database (Port 5432)
 
   widgets.yaml: |
     - kubernetes:
@@ -132,6 +120,7 @@ data:
         expanded: true
         cpu: true
         memory: true
+        label: "Homepage Pod"
 
     - search:
         provider: google
