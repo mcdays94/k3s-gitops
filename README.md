@@ -1,0 +1,94 @@
+# K3s GitOps Repository
+
+This repository contains all Kubernetes manifests for the K3s Raspberry Pi cluster, managed via ArgoCD.
+
+## 🏗️ Repository Structure
+
+```
+k3s-gitops/
+├── apps/                      # Application deployments
+│   ├── monitoring/           # Prometheus + Grafana stack
+│   ├── uptime-kuma/          # Uptime monitoring
+│   ├── pgadmin/              # PostgreSQL admin UI
+│   └── portainer/            # Kubernetes management UI
+├── infrastructure/           # Infrastructure components
+│   ├── metallb/              # LoadBalancer
+│   ├── cloudflare-tunnel/   # External access
+│   └── nfs-storage/          # NFS persistent volumes
+└── argocd/                   # ArgoCD configuration
+    ├── applications/         # ArgoCD Application manifests
+    └── bootstrap/            # Initial ArgoCD setup
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+- K3s cluster running
+- kubectl configured
+- ArgoCD installed
+
+### Deploy Everything
+
+```bash
+# Install ArgoCD
+kubectl apply -k argocd/bootstrap/
+
+# Deploy all applications
+kubectl apply -f argocd/applications/
+```
+
+## 📊 Deployed Applications
+
+| Application | Namespace | URL | Description |
+|------------|-----------|-----|-------------|
+| Grafana | monitoring | http://10.10.10.201 | Monitoring dashboards |
+| Prometheus | monitoring | Internal | Metrics collection |
+| Uptime Kuma | uptime-kuma | http://10.10.10.202:3001 | Uptime monitoring |
+| pgAdmin | pgadmin | http://10.10.10.203 | PostgreSQL admin |
+| Portainer | portainer | http://10.10.10.200:9000 | K8s management |
+
+## 🔄 GitOps Workflow
+
+1. **Make changes** to YAML files in this repo
+2. **Commit and push** to Git
+3. **ArgoCD automatically syncs** changes to cluster
+4. **Monitor** sync status in ArgoCD UI
+
+## 🔐 Secrets Management
+
+Secrets are managed using Sealed Secrets:
+- Encrypt secrets: `kubeseal < secret.yaml > sealed-secret.yaml`
+- Commit encrypted secrets to Git
+- Sealed Secrets controller decrypts in cluster
+
+## 📝 Adding New Applications
+
+1. Create directory under `apps/` or `infrastructure/`
+2. Add Kubernetes manifests
+3. Create ArgoCD Application in `argocd/applications/`
+4. Commit and push - ArgoCD will deploy automatically!
+
+## 🛠️ Maintenance
+
+```bash
+# Check ArgoCD sync status
+kubectl get applications -n argocd
+
+# Manual sync if needed
+argocd app sync <app-name>
+
+# View application details
+argocd app get <app-name>
+```
+
+## 📚 Documentation
+
+See [post-setup.md](../k3s-rpi-cluster/post-setup.md) for detailed setup instructions.
+
+## 🏷️ Cluster Information
+
+- **Nodes**: 3x Raspberry Pi 5 (1 master, 2 workers)
+- **Network**: 10.10.10.0/24
+- **MetalLB Pool**: 10.10.10.200-220
+- **External DB**: PostgreSQL on 10.10.10.70
+- **Storage**: NFS on PostgreSQL VM (zero microSD wear!)
