@@ -39,16 +39,18 @@ kubectl apply -f argocd/applications/
 
 ## 📊 Deployed Applications
 
-| Application | Namespace | URL | Description |
-|------------|-----------|-----|-------------|
-| Portainer | portainer | http://10.10.10.200:9000 | K8s management |
-| Grafana | monitoring | http://10.10.10.201 | Monitoring dashboards |
-| Uptime Kuma | uptime-kuma | http://10.10.10.202:3001 | Uptime monitoring |
-| pgAdmin | pgadmin | http://10.10.10.203 | PostgreSQL admin |
-| ArgoCD | argocd | http://10.10.10.204 | GitOps management |
-| Cloudflare Tunnel | cloudflare-tunnel | N/A | External access gateway |
-| Prometheus | monitoring | Internal | Metrics collection |
-| MetalLB | metallb-system | N/A | LoadBalancer provider |
+| Application | Namespace | URL | Description | Storage |
+|------------|-----------|-----|-------------|---------|
+| Portainer | portainer | http://10.10.10.200:9000 | K8s management | NFS (10Gi) |
+| Grafana | monitoring | http://10.10.10.201 | Monitoring dashboards | NFS (1Gi) |
+| Uptime Kuma | uptime-kuma | http://10.10.10.202:3001 | Uptime monitoring | NFS (5Gi) |
+| pgAdmin | pgadmin | http://10.10.10.203 | PostgreSQL admin | Local (1Gi) |
+| ArgoCD | argocd | http://10.10.10.204 | GitOps management | - |
+| AdGuard Home | adguard-home | http://10.10.10.207 | DNS filtering | NFS (7Gi) |
+| Homepage | homepage | http://10.10.10.205 | Dashboard | - |
+| Cloudflare Tunnel | cloudflare-tunnel | N/A | External access gateway | - |
+| Prometheus | monitoring | Internal | Metrics collection | NFS (50Gi) |
+| MetalLB | metallb-system | N/A | LoadBalancer provider | - |
 
 ## 🔄 GitOps Workflow
 
@@ -94,4 +96,7 @@ See [post-setup.md](../k3s-rpi-cluster/post-setup.md) for detailed setup instruc
 - **Network**: 10.10.10.0/24
 - **MetalLB Pool**: 10.10.10.200-220
 - **External DB**: PostgreSQL on 10.10.10.70
-- **Storage**: NFS on PostgreSQL VM (zero microSD wear!)
+- **NFS Storage**: 10.10.10.70:/srv/nfs (72Gi allocated)
+  - All high-write apps (databases, logs) use NFS
+  - Protects Raspberry Pi microSD cards from wear
+  - See [STORAGE-GUIDELINES.md](STORAGE-GUIDELINES.md) for details

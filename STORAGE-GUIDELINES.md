@@ -19,14 +19,21 @@ The K3s worker nodes run on Raspberry Pi with microSD cards. To prevent SD card 
 
 ## Current NFS Volumes
 
+All high-write applications have been migrated to NFS to protect SD cards:
+
 ```
 /srv/nfs/
-├── prometheus/      (50Gi) - Metrics database
-├── uptime-kuma/     (5Gi)  - Uptime monitoring database
-├── adguard-work/    (5Gi)  - AdGuard DNS query logs
-├── adguard-conf/    (2Gi)  - AdGuard configuration
-└── portainer/       (10Gi) - Portainer data
+├── prometheus/      (50Gi) - Prometheus metrics database
+├── uptime-kuma/     (5Gi)  - Uptime Kuma monitoring database
+├── adguard-work/    (5Gi)  - AdGuard Home DNS query logs
+├── adguard-conf/    (2Gi)  - AdGuard Home configuration
+└── portainer/       (10Gi) - Portainer container management data
 ```
+
+**Total NFS Usage:** 72Gi allocated
+
+**Remaining on SD cards (local-path):**
+- `pgadmin` (1Gi) - Low-write UI configuration only - acceptable to keep on SD
 
 ## When Adding New Applications
 
