@@ -32,6 +32,8 @@ spec:
           value: "google"
         - name: LOG_TARGETS
           value: "stdout"
+        - name: HOMEPAGE_CONFIG_FILE
+          value: "/app/config/settings.yaml"
         volumeMounts:
         - name: config
           mountPath: /app/config

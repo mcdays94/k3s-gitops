@@ -9,6 +9,8 @@ data:
     theme: dark
     color: slate
     headerStyle: boxed
+    target: _blank
+    disableHostValidation: true
     layout:
       - Cluster Services:
           style: row
