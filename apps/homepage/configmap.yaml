@@ -56,9 +56,9 @@ data:
             ping: http://10.10.10.79
         - AdGuard Home (Pi4):
             icon: adguard-home.png
-            href: http://10.10.10.24
+            href: http://10.10.10.23
             description: DNS Filtering (Pi4)
-            ping: http://10.10.10.24
+            ping: http://10.10.10.23
 
     - Monitoring:
         - Grafana:
