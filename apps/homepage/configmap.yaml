@@ -125,25 +125,18 @@ data:
           memory: true
           showLabel: true
 
-    - resources:
-        backend: kubernetes
-        expanded: true
-        cpu: true
-        memory: true
-        label: "Homepage Pod"
-
     - glances:
         url: http://10.10.10.96:61208
         version: 3
-        metric: cpu
-        chart: false
+        metric: info
+        refreshInterval: 5000
         label: "Proxmox"
 
     - glances:
         url: http://10.10.10.23:61208
         version: 3
-        metric: cpu
-        chart: false
+        metric: info
+        refreshInterval: 5000
         label: "Pi4"
 
     - search:
