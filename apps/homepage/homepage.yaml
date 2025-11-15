@@ -36,6 +36,36 @@ spec:
           value: "/app/config/settings.yaml"
         - name: HOMEPAGE_ALLOWED_HOSTS
           value: "10.10.10.208"
+        - name: HOMEPAGE_VAR_ADGUARD_K3S_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: k3s-username
+        - name: HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: k3s-password
+        - name: HOMEPAGE_VAR_ADGUARD_ORIGIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: origin-username
+        - name: HOMEPAGE_VAR_ADGUARD_ORIGIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: origin-password
+        - name: HOMEPAGE_VAR_ADGUARD_PI4_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: pi4-username
+        - name: HOMEPAGE_VAR_ADGUARD_PI4_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: pi4-password
         volumeMounts:
         - name: config
           mountPath: /app/config

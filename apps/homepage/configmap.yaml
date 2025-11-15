@@ -51,6 +51,8 @@ data:
             widget:
               type: adguard
               url: http://10.10.10.207
+              username: {{HOMEPAGE_VAR_ADGUARD_K3S_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD}}
         - AdGuard Home (Origin):
             icon: adguard-home.png
             href: http://10.10.10.79
@@ -59,6 +61,8 @@ data:
             widget:
               type: adguard
               url: http://10.10.10.79
+              username: {{HOMEPAGE_VAR_ADGUARD_ORIGIN_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_ORIGIN_PASSWORD}}
         - AdGuard Home (Pi4):
             icon: adguard-home.png
             href: http://10.10.10.23
@@ -67,6 +71,8 @@ data:
             widget:
               type: adguard
               url: http://10.10.10.23
+              username: {{HOMEPAGE_VAR_ADGUARD_PI4_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_PI4_PASSWORD}}
 
     - Monitoring:
         - Grafana:
