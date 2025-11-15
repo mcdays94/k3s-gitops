@@ -35,7 +35,7 @@ data:
             href: http://10.10.10.200:9000
             description: Kubernetes Management
         - ArgoCD:
-            icon: argocd
+            icon: https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png
             href: http://10.10.10.204
             description: GitOps Continuous Deployment
         - pgAdmin:
