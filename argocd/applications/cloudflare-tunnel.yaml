@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR_USERNAME/k3s-gitops  # UPDATE THIS!
+    targetRevision: main
+    path: infrastructure/cloudflare-tunnel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-tunnel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  # Note: The tunnel-token secret must exist before syncing
+  # It's not managed by GitOps for security reasons
