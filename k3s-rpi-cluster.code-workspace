@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "../k3s-rpi-cluster"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}

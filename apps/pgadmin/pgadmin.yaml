@@ -35,7 +35,10 @@ spec:
         - name: PGADMIN_DEFAULT_EMAIL
           value: "admin@admin.com"
         - name: PGADMIN_DEFAULT_PASSWORD
-          value: "admin"
+          valueFrom:
+            secretKeyRef:
+              name: pgadmin-secret
+              key: password
         - name: PGADMIN_CONFIG_SERVER_MODE
           value: "False"
         volumeMounts:

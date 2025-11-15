@@ -41,11 +41,14 @@ kubectl apply -f argocd/applications/
 
 | Application | Namespace | URL | Description |
 |------------|-----------|-----|-------------|
+| Portainer | portainer | http://10.10.10.200:9000 | K8s management |
 | Grafana | monitoring | http://10.10.10.201 | Monitoring dashboards |
-| Prometheus | monitoring | Internal | Metrics collection |
 | Uptime Kuma | uptime-kuma | http://10.10.10.202:3001 | Uptime monitoring |
 | pgAdmin | pgadmin | http://10.10.10.203 | PostgreSQL admin |
-| Portainer | portainer | http://10.10.10.200:9000 | K8s management |
+| ArgoCD | argocd | http://10.10.10.204 | GitOps management |
+| Cloudflare Tunnel | cloudflare-tunnel | N/A | External access gateway |
+| Prometheus | monitoring | Internal | Metrics collection |
+| MetalLB | metallb-system | N/A | LoadBalancer provider |
 
 ## 🔄 GitOps Workflow
 
