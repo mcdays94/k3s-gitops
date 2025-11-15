@@ -31,46 +31,44 @@ data:
             icon: portainer.png
             href: http://10.10.10.200:9000
             description: Kubernetes Management
-            ping: http://10.10.10.200:9000
+            ping: http://portainer.portainer.svc.cluster.local:9000
         - ArgoCD:
             icon: argocd.png
             href: http://10.10.10.204
             description: GitOps Continuous Deployment
-            ping: http://10.10.10.204
+            ping: http://argocd-server.argocd.svc.cluster.local
         - pgAdmin:
             icon: pgadmin.png
             href: http://10.10.10.203
             description: PostgreSQL Management
-            ping: http://10.10.10.203
+            ping: http://pgadmin.pgadmin.svc.cluster.local
 
     - Infrastructure:
         - AdGuard Home (K3s):
             icon: adguard-home.png
             href: http://10.10.10.207
             description: DNS Filtering (Cluster)
-            ping: http://10.10.10.207
+            ping: http://adguard-home-web.adguard-home.svc.cluster.local
         - AdGuard Home (Origin):
             icon: adguard-home.png
             href: http://10.10.10.79
             description: DNS Filtering (Origin)
-            ping: http://10.10.10.79
         - AdGuard Home (Pi4):
             icon: adguard-home.png
             href: http://10.10.10.24
             description: DNS Filtering (Pi4)
-            ping: http://10.10.10.24
 
     - Monitoring:
         - Grafana:
             icon: grafana.png
             href: http://10.10.10.201
             description: Metrics & Dashboards
-            ping: http://10.10.10.201
+            ping: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
         - Uptime Kuma:
             icon: uptime-kuma.png
             href: http://10.10.10.202:3001
             description: Service Monitoring
-            ping: http://10.10.10.202:3001
+            ping: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
         - Prometheus:
             icon: prometheus.png
             href: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
@@ -82,7 +80,6 @@ data:
             icon: postgresql.png
             href: http://10.10.10.70
             description: External Database
-            ping: 10.10.10.70
         - Proxmox:
             icon: proxmox.png
             href: https://YOUR_PROXMOX_IP:8006
