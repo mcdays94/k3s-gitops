@@ -51,23 +51,35 @@ argocd account update-password
 
 ## 🔄 Disaster Recovery
 
-### Option 1: Manual Recreation (Current)
+### ✅ Sealed Secrets (ACTIVE)
 
-Keep this file and your passwords in a **secure password manager** (1Password, Bitwarden, etc.)
+**Sealed Secrets is now installed!** All secrets are encrypted and stored in Git.
 
-### Option 2: Sealed Secrets (Recommended)
+**What's encrypted:**
+- ✅ Cloudflare Tunnel token → `infrastructure/cloudflare-tunnel/sealed-secret.yaml`
+- ✅ pgAdmin password → `apps/pgadmin/sealed-secret.yaml`
 
-**Coming in Phase 5!**
+**Private Key Backup:**
+The Sealed Secrets private key is backed up at:
+- `sealed-secrets-key-backup.yaml` (in this directory, NOT committed to Git!)
 
-1. Install Sealed Secrets controller
-2. Backup the sealing key:
+**⚠️ IMPORTANT:** Store `sealed-secrets-key-backup.yaml` in a secure location:
+- Password manager (1Password, Bitwarden)
+- Encrypted USB drive
+- Secure cloud storage (encrypted)
+
+**Disaster Recovery Steps:**
+1. Clone Git repo: `git clone https://github.com/mcdays94/k3s-gitops.git`
+2. Install Sealed Secrets controller
+3. Restore private key:
    ```bash
-   kubectl get secret -n kube-system sealed-secrets-key -o yaml > sealed-secrets-key-backup.yaml
+   kubectl apply -f sealed-secrets-key-backup.yaml
+   kubectl delete pod -n kube-system -l name=sealed-secrets-controller
    ```
-3. Store backup in secure location (NOT in Git!)
-4. Encrypt secrets and commit to Git
+4. Apply all manifests: `kubectl apply -f argocd/applications/`
+5. Sealed Secrets controller decrypts everything automatically!
 
-### Option 3: External Secrets Operator
+### Option 2: External Secrets Operator (Alternative)
 
 Use external vault (AWS Secrets Manager, HashiCorp Vault, etc.)
 
