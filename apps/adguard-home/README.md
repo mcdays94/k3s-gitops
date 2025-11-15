@@ -26,7 +26,7 @@ This is your **3rd AdGuard Home instance** that syncs with:
 
 ## AdGuard Sync Configuration
 
-Your AdGuardHome-Sync instance is running at **10.10.10.23** (Pi4 Docker container).
+Your AdGuardHome-Sync instance is running at **10.10.10.24** (Pi4 Docker container).
 
 ### Add This K3s Instance to Sync
 
@@ -43,7 +43,7 @@ Your AdGuardHome-Sync instance is running at **10.10.10.23** (Pi4 Docker contain
 
 3. **Update AdGuardHome-Sync configuration:**
    
-   SSH into your Pi4 (10.10.10.23) and edit the sync config:
+   SSH into your Pi4 (10.10.10.24) and edit the sync config:
    
    ```yaml
    # Add this K3s instance to your sync configuration

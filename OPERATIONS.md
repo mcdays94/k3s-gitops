@@ -31,7 +31,7 @@ This guide covers common operational scenarios, disaster recovery, and maintenan
 
 If nodes are intact but K3s is broken:
 ```bash
-# On master node (10.10.10.21)
+# On master node (10.10.10.71)
 sudo systemctl stop k3s
 sudo /usr/local/bin/k3s-uninstall.sh
 
@@ -41,7 +41,7 @@ curl -sfL https://get.k3s.io | sh -s - server \
   --disable=traefik \
   --write-kubeconfig-mode=644
 
-# On worker nodes (10.10.10.22, 10.10.10.23)
+# On worker nodes (10.10.10.72, 10.10.10.73)
 sudo systemctl stop k3s-agent
 sudo /usr/local/bin/k3s-agent-uninstall.sh
 
@@ -49,7 +49,7 @@ sudo /usr/local/bin/k3s-agent-uninstall.sh
 sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Reinstall agent
-curl -sfL https://get.k3s.io | K3S_URL=https://10.10.10.21:6443 \
+curl -sfL https://get.k3s.io | K3S_URL=https://10.10.10.71:6443 \
   K3S_TOKEN=<token> sh -
 ```
 
@@ -220,11 +220,11 @@ kubectl get pods -A
 #### Step 2: Shutdown Nodes
 ```bash
 # Shutdown workers first
-ssh ubuntu@10.10.10.22 "sudo shutdown -h now"
-ssh ubuntu@10.10.10.23 "sudo shutdown -h now"
+ssh ubuntu@10.10.10.72 "sudo shutdown -h now"
+ssh ubuntu@10.10.10.73 "sudo shutdown -h now"
 
 # Wait 30 seconds, then shutdown master
-ssh ubuntu@10.10.10.21 "sudo shutdown -h now"
+ssh ubuntu@10.10.10.71 "sudo shutdown -h now"
 ```
 
 #### Step 3: Power Off
@@ -236,9 +236,9 @@ ssh ubuntu@10.10.10.21 "sudo shutdown -h now"
 **Startup Procedure:**
 
 #### Step 1: Power On Nodes
-- Power on master first (10.10.10.21)
+- Power on master first (10.10.10.71)
 - Wait 2-3 minutes for it to fully boot
-- Power on workers (10.10.10.22, 10.10.10.23)
+- Power on workers (10.10.10.72, 10.10.10.73)
 
 #### Step 2: Verify Cluster
 ```bash
@@ -327,7 +327,7 @@ kubectl get pods -A
 
 # 3. Wait for PostgreSQL to come back
 # Test connection from master node
-ssh ubuntu@10.10.10.21
+ssh ubuntu@10.10.10.71
 psql -h 10.10.10.70 -U k3s -d k3s -c "SELECT 1;"
 
 # 4. Verify K3s reconnected
@@ -490,9 +490,9 @@ ssh ubuntu@<node-ip> "sudo systemctl restart k3s-agent"
 ### Quick Reference
 
 **Cluster IPs:**
-- Master: 10.10.10.21
-- Worker 1: 10.10.10.22
-- Worker 2: 10.10.10.23
+- Master: 10.10.10.71
+- Worker 1: 10.10.10.72
+- Worker 2: 10.10.10.73
 - PostgreSQL: 10.10.10.70
 
 **Service IPs:**

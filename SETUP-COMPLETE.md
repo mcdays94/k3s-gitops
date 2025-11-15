@@ -211,7 +211,7 @@ See [GITOPS-WORKFLOW.md](GITOPS-WORKFLOW.md#disaster-recovery) for detailed step
 
 3. **✅ Configure AdGuard Home**
    - Complete initial setup at http://10.10.10.207:3000
-   - Add to AdGuardHome-Sync (10.10.10.23)
+   - Add to AdGuardHome-Sync (10.10.10.24)
    - Configure DNS settings
 
 4. **✅ Set up Uptime Kuma monitors**
