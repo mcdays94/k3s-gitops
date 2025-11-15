@@ -1,14 +1,54 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: adguard-work-nfs-pv
+  labels:
+    app: adguard-work
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.10.10.70
+    path: /srv/nfs/adguard-work
+  mountOptions:
+    - nfsvers=4
+    - hard
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: adguard-work
   namespace: adguard-home
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: ""
   resources:
     requests:
-      storage: 2Gi
+      storage: 5Gi
+  selector:
+    matchLabels:
+      app: adguard-work
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: adguard-conf-nfs-pv
+  labels:
+    app: adguard-conf
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.10.10.70
+    path: /srv/nfs/adguard-conf
+  mountOptions:
+    - nfsvers=4
+    - hard
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -17,10 +57,14 @@ metadata:
   namespace: adguard-home
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: ""
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
+  selector:
+    matchLabels:
+      app: adguard-conf
 ---
 apiVersion: apps/v1
 kind: Deployment

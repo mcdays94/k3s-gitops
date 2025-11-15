@@ -1,14 +1,36 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: portainer-nfs-pv
+  labels:
+    app: portainer
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.10.10.70
+    path: /srv/nfs/portainer
+  mountOptions:
+    - nfsvers=4
+    - hard
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: portainer
   namespace: portainer
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: ""
   resources:
     requests:
       storage: 10Gi
+  selector:
+    matchLabels:
+      app: portainer
 ---
 apiVersion: apps/v1
 kind: Deployment
