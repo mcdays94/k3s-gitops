@@ -132,6 +132,30 @@ data:
         memory: true
         label: "Homepage Pod"
 
+    - glances:
+        url: http://10.10.10.96:61208
+        metric: cpu
+        chart: true
+        label: "Proxmox CPU"
+
+    - glances:
+        url: http://10.10.10.96:61208
+        metric: memory
+        chart: true
+        label: "Proxmox RAM"
+
+    - glances:
+        url: http://10.10.10.23:61208
+        metric: cpu
+        chart: true
+        label: "Pi4 CPU"
+
+    - glances:
+        url: http://10.10.10.23:61208
+        metric: memory
+        chart: true
+        label: "Pi4 RAM"
+
     - search:
         provider: google
         target: _blank
