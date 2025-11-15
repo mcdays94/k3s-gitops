@@ -157,7 +157,58 @@ data:
 
   docker.yaml: ""
   proxmox.yaml: ""
-  custom.css: ""
+  custom.css: |
+    /* Frosted Glass Theme */
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+    }
+    
+    /* Glassmorphism for all cards */
+    .service-card, .resource-card, .widget-card, [class*="card"] {
+      background: rgba(255, 255, 255, 0.1) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;
+    }
+    
+    /* Service sections */
+    section {
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Widget containers */
+    .widgets {
+      background: rgba(255, 255, 255, 0.05) !important;
+      backdrop-filter: blur(15px) !important;
+      -webkit-backdrop-filter: blur(15px) !important;
+      border-radius: 12px !important;
+    }
+    
+    /* Custom icons for widgets using pseudo-elements */
+    /* Proxmox widget */
+    [class*="widget"]:has([class*="label"]:contains("Proxmox"))::before {
+      content: "🖥️";
+      font-size: 24px;
+      margin-right: 8px;
+    }
+    
+    /* Pi4 widget */
+    [class*="widget"]:has([class*="label"]:contains("Pi4"))::before {
+      content: "🥧";
+      font-size: 24px;
+      margin-right: 8px;
+    }
+    
+    /* Enhance text readability on glass */
+    h1, h2, h3, h4, h5, h6, p, span, div {
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
   custom.js: ""
   kubernetes.yaml: |
     mode: cluster
