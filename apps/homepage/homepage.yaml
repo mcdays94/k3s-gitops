@@ -26,9 +26,17 @@ spec:
         env:
         - name: TZ
           value: "Europe/Lisbon"
+        - name: HOMEPAGE_VAR_TITLE
+          value: "Homelab Dashboard"
+        - name: HOMEPAGE_VAR_SEARCH_PROVIDER
+          value: "google"
+        - name: LOG_TARGETS
+          value: "stdout"
         volumeMounts:
         - name: config
           mountPath: /app/config
+        - name: logs
+          mountPath: /app/config/logs
         resources:
           requests:
             memory: "128Mi"
@@ -40,6 +48,8 @@ spec:
       - name: config
         configMap:
           name: homepage-config
+      - name: logs
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
