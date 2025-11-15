@@ -83,6 +83,11 @@ data:
             href: http://10.10.10.208
             description: Homelab Dashboard
             ping: http://homepage.homepage.svc.cluster.local
+        - UniFi Gateway:
+            icon: unifi.png
+            href: https://10.10.10.1
+            description: Network Gateway
+            ping: https://10.10.10.1
         - PostgreSQL VM:
             icon: postgresql.png
             href: http://10.10.10.70:5432
