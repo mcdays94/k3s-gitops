@@ -28,7 +28,9 @@ spec:
         grafana:
           service:
             type: LoadBalancer
-          adminPassword: admin
+          persistence:
+            enabled: true
+            size: 1Gi
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
