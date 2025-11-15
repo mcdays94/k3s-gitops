@@ -26,11 +26,49 @@ This is your **3rd AdGuard Home instance** that syncs with:
 
 ## AdGuard Sync Configuration
 
-To sync with your existing instances:
+Your AdGuardHome-Sync instance is running at **10.10.10.23** (Pi4 Docker container).
 
-1. Install AdGuard Sync on all instances
-2. Configure sync settings to include this K3s instance
-3. All settings, filters, and blocklists will sync automatically
+### Add This K3s Instance to Sync
+
+1. **Get the AdGuard Home web UI IP:**
+   ```bash
+   kubectl get svc -n adguard-home adguard-home-web
+   # Use the EXTERNAL-IP (e.g., 10.10.10.207)
+   ```
+
+2. **Complete initial setup:**
+   - Access: `http://10.10.10.207:3000`
+   - Set admin username/password
+   - Configure DNS settings
+
+3. **Update AdGuardHome-Sync configuration:**
+   
+   SSH into your Pi4 (10.10.10.23) and edit the sync config:
+   
+   ```yaml
+   # Add this K3s instance to your sync configuration
+   replicas:
+     - url: http://10.10.10.70:3000  # Proxmox VM
+       username: admin
+       password: your-password
+     
+     - url: http://YOUR_OTHER_PI_IP:3000  # Other Pi4
+       username: admin
+       password: your-password
+     
+     - url: http://10.10.10.207:3000  # K3s instance (NEW!)
+       username: admin
+       password: your-password
+   ```
+
+4. **Restart AdGuardHome-Sync:**
+   ```bash
+   docker restart adguardhome-sync
+   ```
+
+5. **Verify sync:**
+   - Check sync logs: `docker logs adguardhome-sync`
+   - All 3 instances should now have identical settings!
 
 ## High Availability
 
