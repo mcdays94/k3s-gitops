@@ -100,6 +100,11 @@ data:
             href: https://10.10.10.1
             description: Network Gateway
             ping: https://10.10.10.1
+        - Personal Blog:
+            icon: mdi-post
+            href: https://mdias.info
+            description: mdias.info
+            ping: https://mdias.info
 
   widgets.yaml: |
     - kubernetes:
