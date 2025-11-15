@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguard-work
+  namespace: adguard-home
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: adguard-conf
+  namespace: adguard-home
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard-home
+  namespace: adguard-home
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard-home
+  template:
+    metadata:
+      labels:
+        app: adguard-home
+    spec:
+      containers:
+      - name: adguard-home
+        image: adguard/adguardhome:latest
+        ports:
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 53
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 3000
+          name: http-setup
+          protocol: TCP
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        volumeMounts:
+        - name: work
+          mountPath: /opt/adguardhome/work
+        - name: conf
+          mountPath: /opt/adguardhome/conf
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: work
+        persistentVolumeClaim:
+          claimName: adguard-work
+      - name: conf
+        persistentVolumeClaim:
+          claimName: adguard-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-home-web
+  namespace: adguard-home
+spec:
+  type: LoadBalancer
+  selector:
+    app: adguard-home
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  - port: 443
+    targetPort: 443
+    name: https
+  - port: 3000
+    targetPort: 3000
+    name: setup
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-home-dns-tcp
+  namespace: adguard-home
+spec:
+  type: LoadBalancer
+  selector:
+    app: adguard-home
+  ports:
+  - port: 53
+    targetPort: 53
+    protocol: TCP
+    name: dns-tcp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-home-dns-udp
+  namespace: adguard-home
+spec:
+  type: LoadBalancer
+  selector:
+    app: adguard-home
+  ports:
+  - port: 53
+    targetPort: 53
+    protocol: UDP
+    name: dns-udp
