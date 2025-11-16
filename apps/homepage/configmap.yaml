@@ -35,18 +35,11 @@ data:
             href: http://10.10.10.200:9000
             description: Kubernetes Management
             widget:
-              type: kubernetes
-              cluster:
-                show: true
-                cpu: true
-                memory: true
-                showLabel: true
-                label: "cluster"
-              nodes:
-                show: true
-                cpu: true
-                memory: true
-                showLabel: true
+              type: portainer
+              url: http://10.10.10.200:9000
+              env: 1
+              kubernetes: true
+              key: {{HOMEPAGE_VAR_PORTAINER_K3S_KEY}}
         - ArgoCD:
             icon: si-argo
             href: http://10.10.10.204
