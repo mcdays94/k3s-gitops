@@ -83,6 +83,10 @@ data:
             icon: uptime-kuma.png
             href: http://10.10.10.202:3001
             description: Service Monitoring
+            widget:
+              type: uptimekuma
+              url: http://10.10.10.202:3001
+              slug: default
         - Prometheus:
             icon: prometheus.png
             href: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
