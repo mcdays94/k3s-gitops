@@ -35,10 +35,18 @@ data:
             href: http://10.10.10.200:9000
             description: Kubernetes Management
             widget:
-              type: portainer
-              url: http://10.10.10.200:9000
-              env: 1
-              key: {{HOMEPAGE_VAR_PORTAINER_K3S_KEY}}
+              type: kubernetes
+              cluster:
+                show: true
+                cpu: true
+                memory: true
+                showLabel: true
+                label: "cluster"
+              nodes:
+                show: true
+                cpu: true
+                memory: true
+                showLabel: true
         - ArgoCD:
             icon: si-argo
             href: http://10.10.10.204
@@ -98,8 +106,8 @@ data:
               slug: default
         - Prometheus:
             icon: prometheus.png
-            href: http://10.10.10.201:9090
-            description: Metrics Collection
+            href: http://10.10.10.201/explore
+            description: Metrics Collection (via Grafana)
             widget:
               type: prometheus
               url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090

@@ -81,11 +81,6 @@ spec:
             secretKeyRef:
               name: argocd-creds
               key: key
-        - name: HOMEPAGE_VAR_PORTAINER_K3S_KEY
-          valueFrom:
-            secretKeyRef:
-              name: portainer-keys
-              key: k3s-key
         - name: HOMEPAGE_VAR_PORTAINER_PI4_KEY
           valueFrom:
             secretKeyRef:
