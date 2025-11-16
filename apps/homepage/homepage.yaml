@@ -76,6 +76,11 @@ spec:
             secretKeyRef:
               name: unifi-creds
               key: password
+        - name: HOMEPAGE_VAR_ARGOCD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: argocd-creds
+              key: password
         volumeMounts:
         - name: config
           mountPath: /app/config

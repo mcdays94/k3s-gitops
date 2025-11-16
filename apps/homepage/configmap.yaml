@@ -35,9 +35,14 @@ data:
             href: http://10.10.10.200:9000
             description: Kubernetes Management
         - ArgoCD:
-            icon: https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/png/argocd.png
+            icon: si-argo
             href: http://10.10.10.204
             description: GitOps Continuous Deployment
+            widget:
+              type: argocd
+              url: http://10.10.10.204
+              username: admin
+              password: {{HOMEPAGE_VAR_ARGOCD_PASSWORD}}
         - pgAdmin:
             icon: pgadmin.png
             href: http://10.10.10.203
@@ -89,8 +94,11 @@ data:
               slug: default
         - Prometheus:
             icon: prometheus.png
-            href: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+            href: http://10.10.10.201:9090
             description: Metrics Collection
+            widget:
+              type: prometheus
+              url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
 
     - Docker Hosts:
         - Portainer (Pi4):
