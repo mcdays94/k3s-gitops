@@ -37,7 +37,7 @@ data:
             widget:
               type: portainer
               url: http://10.10.10.200:9000
-              env: 2
+              env: 1
               key: {{HOMEPAGE_VAR_PORTAINER_K3S_KEY}}
         - ArgoCD:
             icon: si-argo
@@ -114,7 +114,7 @@ data:
             widget:
               type: portainer
               url: https://10.10.10.23:9443
-              env: 1
+              env: 2
               key: {{HOMEPAGE_VAR_PORTAINER_PI4_KEY}}
         - Portainer (Ubuntu VM):
             icon: si-portainer
@@ -124,7 +124,7 @@ data:
             widget:
               type: portainer
               url: https://10.10.10.79:9443
-              env: 1
+              env: 3
               key: {{HOMEPAGE_VAR_PORTAINER_UBUNTU_KEY}}
 
     - External Services:
