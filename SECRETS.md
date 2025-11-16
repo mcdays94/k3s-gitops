@@ -96,6 +96,7 @@ kubectl create secret generic unifi-creds -n homepage \
 - ✅ pgAdmin password → `apps/pgadmin/sealed-secret.yaml`
 - ✅ AdGuard Home credentials (3 instances) → `apps/homepage/sealed-secret-adguard.yaml`
 - ✅ UniFi Gateway credentials → `apps/homepage/sealed-secret-unifi.yaml`
+- ✅ ArgoCD admin password → `apps/homepage/sealed-secret-argocd.yaml`
 
 **Private Key Backup:**
 The Sealed Secrets private key is backed up at:
@@ -127,13 +128,18 @@ Use external vault (AWS Secrets Manager, HashiCorp Vault, etc.)
 
 When rebuilding from scratch:
 
-- [ ] Restore Sealed Secrets key from backup
-- [ ] Create `cloudflare-tunnel/tunnel-token` sealed secret
-- [ ] Create `pgadmin/pgadmin-secret` sealed secret  
-- [ ] Create `homepage/adguard-creds` sealed secret
-- [ ] Create `homepage/unifi-creds` sealed secret
-- [ ] Note ArgoCD initial admin password
-- [ ] Apply all ArgoCD applications (secrets auto-decrypt)
+- [ ] Install K3s cluster
+- [ ] Install Sealed Secrets controller
+- [ ] **Restore Sealed Secrets private key** (`sealed-secrets-key-backup.yaml`)
+- [ ] Restart sealed-secrets controller pod
+- [ ] Install ArgoCD
+- [ ] Apply all ArgoCD applications
+- [ ] **All sealed secrets auto-decrypt!** ✨
+  - Cloudflare Tunnel token
+  - pgAdmin password
+  - AdGuard credentials
+  - UniFi credentials
+  - ArgoCD password
 
 ---
 
