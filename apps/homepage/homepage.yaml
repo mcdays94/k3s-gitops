@@ -76,11 +76,11 @@ spec:
             secretKeyRef:
               name: unifi-creds
               key: password
-        - name: HOMEPAGE_VAR_ARGOCD_PASSWORD
+        - name: HOMEPAGE_VAR_ARGOCD_KEY
           valueFrom:
             secretKeyRef:
               name: argocd-creds
-              key: password
+              key: key
         - name: HOMEPAGE_VAR_PORTAINER_K3S_KEY
           valueFrom:
             secretKeyRef:

@@ -46,8 +46,7 @@ data:
             widget:
               type: argocd
               url: https://10.10.10.204
-              username: admin
-              password: {{HOMEPAGE_VAR_ARGOCD_PASSWORD}}
+              key: {{HOMEPAGE_VAR_ARGOCD_KEY}}
         - pgAdmin:
             icon: pgadmin.png
             href: http://10.10.10.203
