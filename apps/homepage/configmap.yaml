@@ -166,6 +166,7 @@ data:
               url: https://10.10.10.96:8006
               username: {{HOMEPAGE_VAR_PROXMOX_USERNAME}}
               password: {{HOMEPAGE_VAR_PROXMOX_PASSWORD}}
+              node: proxmoxldn
         - Personal Blog:
             icon: mdi-post
             href: https://mdias.info
