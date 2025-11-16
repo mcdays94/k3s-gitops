@@ -148,8 +148,8 @@ data:
                 - state: sensor.blue_pure_max_pm_2_5
                   label: air quality
                   value: "{state} µg/m³"
-              fields:
-                - lights_on
+                - template: "{{ states.light | selectattr('state', 'equalto', 'on') | list | length }}"
+                  label: lights on
         - UniFi Gateway:
             icon: unifi.png
             href: https://10.10.10.1
