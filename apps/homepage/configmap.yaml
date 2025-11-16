@@ -128,10 +128,6 @@ data:
               key: {{HOMEPAGE_VAR_PORTAINER_UBUNTU_KEY}}
 
     - External Services:
-        - Homepage:
-            icon: homepage.png
-            href: http://10.10.10.208
-            description: Homelab Dashboard
         - Home Assistant:
             icon: home-assistant.png
             href: http://10.10.10.189:8123
