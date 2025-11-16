@@ -137,6 +137,19 @@ data:
             href: http://10.10.10.189:8123
             description: Home Automation
             ping: http://10.10.10.189:8123
+            widget:
+              type: homeassistant
+              url: http://10.10.10.189:8123
+              key: {{HOMEPAGE_VAR_HOMEASSISTANT_KEY}}
+              custom:
+                - state: sensor.smartplughomelab_power
+                  label: homelab power
+                  value: "{state} W"
+                - state: sensor.blue_pure_max_pm_2_5
+                  label: air quality
+                  value: "{state} µg/m³"
+              fields:
+                - lights_on
         - UniFi Gateway:
             icon: unifi.png
             href: https://10.10.10.1

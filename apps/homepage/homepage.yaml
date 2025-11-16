@@ -106,6 +106,11 @@ spec:
             secretKeyRef:
               name: proxmox-creds
               key: password
+        - name: HOMEPAGE_VAR_HOMEASSISTANT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homeassistant-creds
+              key: key
         volumeMounts:
         - name: config
           mountPath: /app/config
