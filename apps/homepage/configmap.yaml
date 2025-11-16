@@ -92,7 +92,7 @@ data:
             widget:
               type: grafana
               url: http://10.10.10.201
-              username: api_key
+              username: homepage
               password: {{HOMEPAGE_VAR_GRAFANA_TOKEN}}
         - Uptime Kuma:
             icon: uptime-kuma.png
