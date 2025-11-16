@@ -96,6 +96,16 @@ spec:
             secretKeyRef:
               name: portainer-keys
               key: ubuntu-key
+        - name: HOMEPAGE_VAR_PROXMOX_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: proxmox-creds
+              key: username
+        - name: HOMEPAGE_VAR_PROXMOX_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: proxmox-creds
+              key: password
         volumeMounts:
         - name: config
           mountPath: /app/config
