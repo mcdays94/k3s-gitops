@@ -86,19 +86,16 @@ spec:
             secretKeyRef:
               name: portainer-keys
               key: k3s-key
-              optional: true
         - name: HOMEPAGE_VAR_PORTAINER_PI4_KEY
           valueFrom:
             secretKeyRef:
               name: portainer-keys
               key: pi4-key
-              optional: true
         - name: HOMEPAGE_VAR_PORTAINER_UBUNTU_KEY
           valueFrom:
             secretKeyRef:
               name: portainer-keys
               key: ubuntu-key
-              optional: true
         volumeMounts:
         - name: config
           mountPath: /app/config
