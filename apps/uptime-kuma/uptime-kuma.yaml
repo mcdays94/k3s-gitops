@@ -44,7 +44,8 @@ data:
     
     DB_PATH="/app/data/kuma.db"
     SLUG="default"
-    TITLE="Homelab Status"
+    TITLE="Default"
+    GROUP_NAME="Services"
     
     # Wait for database to be ready
     echo "Waiting for Uptime Kuma database..."
@@ -60,22 +61,29 @@ data:
       
       # Create status page
       sqlite3 "$DB_PATH" <<EOF
-    INSERT INTO status_page (slug, title, description, icon, theme, published, show_tags, custom_css, show_powered_by)
-    VALUES ('$SLUG', '$TITLE', 'Automated homelab monitoring', '/icon.svg', 'auto', 1, 0, '', 1);
+    INSERT INTO status_page (slug, title, description, icon, theme, published, search_engine_index, show_tags, custom_css, show_powered_by)
+    VALUES ('$SLUG', '$TITLE', '', '/icon.svg', 'auto', 1, 1, 0, 'body {\n  \n}\n', 1);
     EOF
       
       # Get the status page ID
       STATUS_PAGE_ID=$(sqlite3 "$DB_PATH" "SELECT id FROM status_page WHERE slug='$SLUG';")
+      echo "Created status page with ID: $STATUS_PAGE_ID"
       
-      # Add all monitors to the status page
-      MONITOR_IDS=$(sqlite3 "$DB_PATH" "SELECT id FROM monitor;")
+      # Create a group for the status page
+      sqlite3 "$DB_PATH" "INSERT INTO 'group' (name, public, active, weight, status_page_id) VALUES ('$GROUP_NAME', 0, 1, 1000, $STATUS_PAGE_ID);"
+      GROUP_ID=$(sqlite3 "$DB_PATH" "SELECT id FROM 'group' WHERE status_page_id=$STATUS_PAGE_ID AND name='$GROUP_NAME';")
+      echo "Created group '$GROUP_NAME' with ID: $GROUP_ID"
+      
+      # Add all monitors to the group
+      MONITOR_IDS=$(sqlite3 "$DB_PATH" "SELECT id FROM monitor WHERE active=1;")
       
       for MONITOR_ID in $MONITOR_IDS; do
-        echo "Adding monitor $MONITOR_ID to status page..."
-        sqlite3 "$DB_PATH" "INSERT OR IGNORE INTO status_page_cname (status_page_id, monitor_id) VALUES ($STATUS_PAGE_ID, $MONITOR_ID);"
+        MONITOR_NAME=$(sqlite3 "$DB_PATH" "SELECT name FROM monitor WHERE id=$MONITOR_ID;")
+        echo "Adding monitor $MONITOR_ID ($MONITOR_NAME) to group..."
+        sqlite3 "$DB_PATH" "INSERT OR IGNORE INTO monitor_group (monitor_id, group_id, weight, send_url) VALUES ($MONITOR_ID, $GROUP_ID, 1000, 0);"
       done
       
-      echo "Status page created successfully!"
+      echo "Status page created successfully with all active monitors!"
     else
       echo "Status page '$SLUG' already exists. Skipping creation."
     fi
