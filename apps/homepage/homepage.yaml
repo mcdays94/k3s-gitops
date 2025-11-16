@@ -111,6 +111,11 @@ spec:
             secretKeyRef:
               name: homeassistant-creds
               key: key
+        - name: HOMEPAGE_VAR_GRAFANA_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: grafana-creds
+              key: token
         volumeMounts:
         - name: config
           mountPath: /app/config
