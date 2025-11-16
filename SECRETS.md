@@ -49,6 +49,42 @@ argocd account update-password
 
 ---
 
+### 4. Homepage Widget Credentials
+
+**Namespace:** `homepage`
+
+#### AdGuard Home Credentials (3 instances)
+
+```bash
+# Create sealed secret for AdGuard credentials
+kubectl create secret generic adguard-creds -n homepage \
+  --from-literal=k3s-username='adguardhomek3s' \
+  --from-literal=k3s-password='YOUR_K3S_PASSWORD' \
+  --from-literal=origin-username='amd' \
+  --from-literal=origin-password='YOUR_ORIGIN_PASSWORD' \
+  --from-literal=pi4-username='adguardhomepi' \
+  --from-literal=pi4-password='YOUR_PI4_PASSWORD' \
+  --dry-run=client -o yaml | \
+  kubeseal --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system -o yaml > apps/homepage/sealed-secret-adguard.yaml
+```
+
+#### UniFi Gateway Credentials
+
+```bash
+# Create sealed secret for UniFi credentials
+kubectl create secret generic unifi-creds -n homepage \
+  --from-literal=username='k3s' \
+  --from-literal=password='YOUR_UNIFI_PASSWORD' \
+  --dry-run=client -o yaml | \
+  kubeseal --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system -o yaml > apps/homepage/sealed-secret-unifi.yaml
+```
+
+**Note:** These credentials are used by Homepage dashboard to display stats from AdGuard Home and UniFi Gateway.
+
+---
+
 ## 🔄 Disaster Recovery
 
 ### ✅ Sealed Secrets (ACTIVE)
@@ -58,6 +94,8 @@ argocd account update-password
 **What's encrypted:**
 - ✅ Cloudflare Tunnel token → `infrastructure/cloudflare-tunnel/sealed-secret.yaml`
 - ✅ pgAdmin password → `apps/pgadmin/sealed-secret.yaml`
+- ✅ AdGuard Home credentials (3 instances) → `apps/homepage/sealed-secret-adguard.yaml`
+- ✅ UniFi Gateway credentials → `apps/homepage/sealed-secret-unifi.yaml`
 
 **Private Key Backup:**
 The Sealed Secrets private key is backed up at:
@@ -89,10 +127,13 @@ Use external vault (AWS Secrets Manager, HashiCorp Vault, etc.)
 
 When rebuilding from scratch:
 
-- [ ] Create `cloudflare-tunnel/tunnel-token` secret
-- [ ] Create `pgadmin/pgadmin-secret` secret  
+- [ ] Restore Sealed Secrets key from backup
+- [ ] Create `cloudflare-tunnel/tunnel-token` sealed secret
+- [ ] Create `pgadmin/pgadmin-secret` sealed secret  
+- [ ] Create `homepage/adguard-creds` sealed secret
+- [ ] Create `homepage/unifi-creds` sealed secret
 - [ ] Note ArgoCD initial admin password
-- [ ] (Future) Restore Sealed Secrets key
+- [ ] Apply all ArgoCD applications (secrets auto-decrypt)
 
 ---
 
