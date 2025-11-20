@@ -73,7 +73,35 @@ Secrets are managed using Sealed Secrets:
 3. Create ArgoCD Application in `argocd/applications/`
 4. Commit and push - ArgoCD will deploy automatically!
 
-## 🛠️ Maintenance
+## � Disaster Recovery
+
+### Prometheus Stack Deployment Order
+
+The Prometheus stack requires manual PVC creation before ArgoCD deployment:
+
+```bash
+# 1. Apply NFS PersistentVolumes
+kubectl apply -f apps/monitoring/prometheus-nfs-storage.yaml
+
+# 2. Apply Grafana PVC (must be created before ArgoCD app)
+kubectl apply -f apps/monitoring/grafana-pvc.yaml
+
+# 3. ArgoCD will deploy the rest automatically
+kubectl apply -f argocd/applications/kube-prometheus-stack.yaml
+```
+
+**Note:** Grafana PVC must be manually created with NFS selector to bind to the NFS PersistentVolume. This is why the application shows `OutOfSync` but remains `Healthy`.
+
+### Sealed Secrets Key Backup
+
+The sealed-secrets encryption key is backed up in `sealed-secrets-key-backup.yaml` (gitignored). To restore:
+
+```bash
+kubectl apply -f sealed-secrets-key-backup.yaml
+kubectl delete pod -n kube-system -l name=sealed-secrets-controller
+```
+
+## �🛠️ Maintenance
 
 ```bash
 # Check ArgoCD sync status
