@@ -23,3 +23,4 @@ charts/
 
 # Kustomize
 kustomization.yaml.bak
+sealed-secrets-key-backup.yaml
