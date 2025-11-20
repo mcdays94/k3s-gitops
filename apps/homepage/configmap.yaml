@@ -56,7 +56,7 @@ data:
     - Infrastructure:
         - AdGuard Home (K3s):
             icon: adguard-home.png
-            href: http://10.10.10.207
+            href: http://10.10.10.205
             description: DNS Filtering (Cluster)
             widget:
               type: adguard
