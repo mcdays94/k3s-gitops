@@ -60,10 +60,10 @@ data:
             description: DNS Filtering (Cluster)
             widget:
               type: adguard
-              url: http://10.10.10.207
+              url: http://10.10.10.205
               username: {{HOMEPAGE_VAR_ADGUARD_K3S_USERNAME}}
               password: {{HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD}}
-        - AdGuard Home (Origin):
+        - AdGuard Home (Proxmox Ubuntu Server VM):
             icon: adguard-home.png
             href: http://10.10.10.79
             description: DNS Filtering (Origin)
