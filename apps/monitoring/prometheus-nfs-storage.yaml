@@ -2,6 +2,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: prometheus-nfs-pv
+  labels:
+    app: prometheus
 spec:
   capacity:
     storage: 50Gi
@@ -16,17 +18,3 @@ spec:
     - nfsvers=4
     - hard
     - timeo=600
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: prometheus-nfs-pvc
-  namespace: monitoring
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: ""
-  resources:
-    requests:
-      storage: 50Gi
-  volumeName: prometheus-nfs-pv
