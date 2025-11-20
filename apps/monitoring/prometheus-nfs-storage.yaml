@@ -18,3 +18,24 @@ spec:
     - nfsvers=4
     - hard
     - timeo=600
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: grafana-nfs-pv
+  labels:
+    app: grafana
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 10.10.10.70
+    path: /srv/nfs/grafana
+  mountOptions:
+    - nfsvers=4
+    - hard
+    - timeo=600

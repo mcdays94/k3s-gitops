@@ -32,6 +32,12 @@ spec:
           persistence:
             enabled: true
             size: 1Gi
+            storageClassName: ""
+            accessModes:
+              - ReadWriteMany
+            selector:
+              matchLabels:
+                app: grafana
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
