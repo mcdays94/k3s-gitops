@@ -164,6 +164,7 @@ metadata:
   namespace: uptime-kuma
 spec:
   type: LoadBalancer
+  loadBalancerIP: 10.10.10.202
   selector:
     app: uptime-kuma
   ports:

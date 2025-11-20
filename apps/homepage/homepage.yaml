@@ -142,6 +142,7 @@ metadata:
   namespace: homepage
 spec:
   type: LoadBalancer
+  loadBalancerIP: 10.10.10.208
   selector:
     app: homepage
   ports:

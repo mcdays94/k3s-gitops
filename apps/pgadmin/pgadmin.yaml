@@ -63,6 +63,7 @@ metadata:
   namespace: pgadmin
 spec:
   type: LoadBalancer
+  loadBalancerIP: 10.10.10.203
   selector:
     app: pgadmin
   ports:

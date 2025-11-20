@@ -8,7 +8,7 @@ resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.9.3/manifests/install.yaml
 
 patches:
-  # Patch ArgoCD server service to use LoadBalancer
+  # Patch ArgoCD server service to use LoadBalancer with pinned IP
   - target:
       kind: Service
       name: argocd-server
@@ -16,3 +16,6 @@ patches:
       - op: replace
         path: /spec/type
         value: LoadBalancer
+      - op: add
+        path: /spec/loadBalancerIP
+        value: 10.10.10.204
