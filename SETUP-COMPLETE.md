@@ -20,13 +20,18 @@ Congratulations! Your K3s Raspberry Pi cluster is now fully configured with GitO
 
 | Application | IP | Purpose | Status |
 |------------|-----|---------|--------|
-| **Portainer** | 10.10.10.200:9000 | Kubernetes management UI | ✅ GitOps |
-| **Grafana** | 10.10.10.201 | Monitoring dashboards | ✅ GitOps |
-| **Uptime Kuma** | 10.10.10.202:3001 | Uptime monitoring | ✅ GitOps |
-| **pgAdmin** | 10.10.10.203 | PostgreSQL admin | ✅ GitOps |
-| **ArgoCD** | 10.10.10.204 | GitOps management | ✅ GitOps |
-| **AdGuard Home** | 10.10.10.207 | DNS filtering | ✅ GitOps |
+| **Portainer** | 10.10.10.200:9000 | Kubernetes management UI | ✅ GitOps + Pinned IP |
+| **Grafana** | 10.10.10.201 | Monitoring dashboards | ✅ GitOps + Pinned IP |
+| **Uptime Kuma** | 10.10.10.202:3001 | Uptime monitoring | ✅ GitOps + Pinned IP |
+| **pgAdmin** | 10.10.10.203 | PostgreSQL admin | ✅ GitOps + Pinned IP |
+| **ArgoCD** | 10.10.10.204 | GitOps management | ✅ GitOps + Pinned IP |
+| **AdGuard DNS (TCP)** | 10.10.10.206:53 | DNS filtering (TCP) | ✅ GitOps + Pinned IP |
+| **AdGuard Home** | 10.10.10.207 | DNS filtering (Web UI) | ✅ GitOps + Pinned IP |
+| **Homepage** | 10.10.10.208 | Dashboard | ✅ GitOps + Pinned IP |
+| **AdGuard DNS (UDP)** | 10.10.10.209:53 | DNS filtering (UDP) | ✅ GitOps + Pinned IP |
 | **Prometheus** | Internal | Metrics collection | ✅ GitOps |
+
+> **Note:** All LoadBalancer IPs are pinned using `loadBalancerIP` field to ensure consistent IPs across cluster restarts and service recreations.
 
 ### Security Features
 - ✅ **Encrypted secrets** in Git (Sealed Secrets)
@@ -191,6 +196,56 @@ If your cluster dies, you can rebuild everything from Git in ~15 minutes!
 5. Done! ✅
 
 See [GITOPS-WORKFLOW.md](GITOPS-WORKFLOW.md#disaster-recovery) for detailed steps.
+
+---
+
+## 🔧 LoadBalancer IP Pinning
+
+All services are configured with **pinned LoadBalancer IPs** to ensure consistent access URLs across cluster restarts and service recreations.
+
+### How It Works
+
+Each LoadBalancer service includes a `loadBalancerIP` field:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: portainer
+  namespace: portainer
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.10.10.200  # Pinned IP
+  selector:
+    app: portainer
+  ports:
+  - port: 9000
+    targetPort: 9000
+```
+
+### Benefits
+
+- ✅ **Consistent URLs** - Services always get the same IP
+- ✅ **No DNS updates** - No need to update DNS records after restarts
+- ✅ **Predictable** - Easy to document and remember
+- ✅ **Homepage compatibility** - Dashboard widgets work reliably
+
+### IP Allocation Map
+
+| IP Range | Purpose |
+|----------|---------|
+| 10.10.10.200-209 | Pinned service IPs |
+| 10.10.10.210-220 | Available for new services |
+
+### Adding New Services
+
+When adding a new LoadBalancer service, pick an unused IP from the pool and add it to the service spec:
+
+```yaml
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.10.10.210  # Pick next available IP
+```
 
 ---
 
