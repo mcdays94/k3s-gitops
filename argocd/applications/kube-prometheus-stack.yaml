@@ -38,6 +38,9 @@ spec:
             selector:
               matchLabels:
                 app: grafana
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
