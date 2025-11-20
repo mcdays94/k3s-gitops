@@ -64,3 +64,9 @@ spec:
       kind: Service
       jsonPointers:
         - /status/loadBalancer/ingress
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: kube-prometheus-stack-grafana
+      namespace: monitoring
+      jsonPointers:
+        - /spec/selector
