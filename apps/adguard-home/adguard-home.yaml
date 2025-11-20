@@ -127,7 +127,7 @@ metadata:
   namespace: adguard-home
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.207
+  loadBalancerIP: 10.10.10.205
   selector:
     app: adguard-home
   ports:

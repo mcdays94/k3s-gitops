@@ -25,8 +25,8 @@ Congratulations! Your K3s Raspberry Pi cluster is now fully configured with GitO
 | **Uptime Kuma** | 10.10.10.202:3001 | Uptime monitoring | ✅ GitOps + Pinned IP |
 | **pgAdmin** | 10.10.10.203 | PostgreSQL admin | ✅ GitOps + Pinned IP |
 | **ArgoCD** | 10.10.10.204 | GitOps management | ✅ GitOps + Pinned IP |
+| **AdGuard Home** | 10.10.10.205 | DNS filtering (Web UI) | ✅ GitOps + Pinned IP |
 | **AdGuard DNS (TCP)** | 10.10.10.206:53 | DNS filtering (TCP) | ✅ GitOps + Pinned IP |
-| **AdGuard Home** | 10.10.10.207 | DNS filtering (Web UI) | ✅ GitOps + Pinned IP |
 | **Homepage** | 10.10.10.208 | Dashboard | ✅ GitOps + Pinned IP |
 | **AdGuard DNS (UDP)** | 10.10.10.209:53 | DNS filtering (UDP) | ✅ GitOps + Pinned IP |
 | **Prometheus** | Internal | Metrics collection | ✅ GitOps |
@@ -65,7 +65,7 @@ open http://10.10.10.203
 # Login: admin@admin.com / admin
 
 # AdGuard Home (DNS filtering)
-open http://10.10.10.207
+open http://10.10.10.205
 ```
 
 ### Check Cluster Status
