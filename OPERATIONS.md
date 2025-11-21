@@ -246,10 +246,10 @@ ssh ubuntu@10.10.10.71 "sudo shutdown -h now"
 kubectl get nodes
 
 # Should show:
-# NAME           STATUS   ROLES                  AGE   VERSION
-# k3s-master     Ready    control-plane,master   Xd    v1.x.x
-# k3s-worker1    Ready    <none>                 Xd    v1.x.x
-# k3s-worker2    Ready    <none>                 Xd    v1.x.x
+# NAME            STATUS   ROLES                  AGE   VERSION
+# k3s-master-01   Ready    control-plane,master   Xd    v1.x.x
+# k3s-master-02   Ready    control-plane,master   Xd    v1.x.x
+# k3s-master-03   Ready    control-plane,master   Xd    v1.x.x
 ```
 
 #### Step 3: Uncordon Nodes (if drained)
@@ -490,10 +490,10 @@ ssh ubuntu@<node-ip> "sudo systemctl restart k3s-agent"
 ### Quick Reference
 
 **Cluster IPs:**
-- Master: 10.10.10.71
-- Worker 1: 10.10.10.72
-- Worker 2: 10.10.10.73
-- PostgreSQL: 10.10.10.70
+- Control-Plane 1 (k3s-master-01): 10.10.10.71
+- Control-Plane 2 (k3s-master-02): 10.10.10.72
+- Control-Plane 3 (k3s-master-03): 10.10.10.73
+- PostgreSQL (Shared Datastore): 10.10.10.70
 
 **Service IPs:**
 - Portainer: 10.10.10.200:9000

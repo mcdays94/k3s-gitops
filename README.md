@@ -101,7 +101,7 @@ kubectl apply -f sealed-secrets-key-backup.yaml
 kubectl delete pod -n kube-system -l name=sealed-secrets-controller
 ```
 
-## �🛠️ Maintenance
+## �️ Maintenance
 
 ```bash
 # Check ArgoCD sync status
@@ -120,10 +120,11 @@ See [post-setup.md](../k3s-rpi-cluster/post-setup.md) for detailed setup instruc
 
 ## 🏷️ Cluster Information
 
-- **Nodes**: 3x Raspberry Pi 5 (1 master, 2 workers)
+- **Nodes**: 3x Raspberry Pi 5 (all control-plane nodes in HA configuration)
+- **Architecture**: High Availability cluster with 3 control-plane nodes
 - **Network**: 10.10.10.0/24
 - **MetalLB Pool**: 10.10.10.200-220
-- **External DB**: PostgreSQL on 10.10.10.70
+- **External DB**: PostgreSQL on 10.10.10.70 (shared datastore for all control-plane nodes)
 - **NFS Storage**: 10.10.10.70:/srv/nfs (72Gi allocated)
   - All high-write apps (databases, logs) use NFS
   - Protects Raspberry Pi microSD cards from wear

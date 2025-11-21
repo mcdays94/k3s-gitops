@@ -5,8 +5,9 @@ Congratulations! Your K3s Raspberry Pi cluster is now fully configured with GitO
 ## 📊 What You Have Now
 
 ### Infrastructure
-- ✅ **3-node K3s cluster** (1 master, 2 workers)
-- ✅ **External PostgreSQL database** (10.10.10.70)
+- ✅ **3-node HA K3s cluster** (all control-plane nodes)
+- ✅ **High Availability** - Survives any single node failure
+- ✅ **External PostgreSQL database** (10.10.10.70 - shared datastore)
 - ✅ **MetalLB LoadBalancer** (10.10.10.200-220 pool)
 - ✅ **NFS storage** for Prometheus (zero microSD wear!)
 - ✅ **Cloudflare Tunnel** for external access
@@ -387,14 +388,15 @@ You've built something impressive. Enjoy your cluster! 🚀
 
 **What we accomplished:**
 
-1. ✅ **Cluster Setup** - 3-node K3s cluster with external PostgreSQL
-2. ✅ **Infrastructure** - MetalLB, Cloudflare Tunnel, NFS storage
-3. ✅ **Monitoring** - Prometheus, Grafana, Uptime Kuma
-4. ✅ **Management** - Portainer, pgAdmin, ArgoCD
-5. ✅ **GitOps** - Full GitOps implementation with ArgoCD
-6. ✅ **Security** - Sealed Secrets for encrypted secrets
-7. ✅ **Documentation** - Comprehensive guides and workflows
-8. ✅ **DNS Filtering** - AdGuard Home (3rd instance)
+1. ✅ **Cluster Setup** - 3-node HA K3s cluster with external PostgreSQL
+2. ✅ **High Availability** - All nodes as control-plane for true HA
+3. ✅ **Infrastructure** - MetalLB, Cloudflare Tunnel, NFS storage
+4. ✅ **Monitoring** - Prometheus, Grafana, Uptime Kuma
+5. ✅ **Management** - Portainer, pgAdmin, ArgoCD
+6. ✅ **GitOps** - Full GitOps implementation with ArgoCD
+7. ✅ **Security** - Sealed Secrets for encrypted secrets
+8. ✅ **Documentation** - Comprehensive guides and workflows
+9. ✅ **DNS Filtering** - AdGuard Home (3rd instance)
 
 **Total time invested:** ~4-6 hours
 **Result:** Enterprise-grade homelab! 🏆
