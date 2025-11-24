@@ -35,7 +35,7 @@ spec:
         - name: HOMEPAGE_CONFIG_FILE
           value: "/app/config/settings.yaml"
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "10.10.10.208"
+          value: "10.10.10.208,hp.mdias.info"
         - name: HOMEPAGE_VAR_ADGUARD_K3S_USERNAME
           valueFrom:
             secretKeyRef:
