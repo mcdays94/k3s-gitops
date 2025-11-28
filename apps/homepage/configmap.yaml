@@ -191,6 +191,7 @@ data:
           cpu: true
           memory: true
           showLabel: true
+        refreshInterval: 10000
 
     - glances:
         url: http://10.10.10.96:61208
