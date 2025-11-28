@@ -32,7 +32,7 @@ data:
             description: Service Monitoring
             widget:
               type: uptimekuma
-              url: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
+              url: http://10.10.10.202:3001
               slug: default
 
     - Network Services:
@@ -41,7 +41,7 @@ data:
             description: DNS Filtering (Cluster)
             widget:
               type: adguard
-              url: http://adguard-home-web.adguard-home.svc.cluster.local
+              url: http://10.10.10.205
               username: {{HOMEPAGE_VAR_ADGUARD_K3S_USERNAME}}
               password: {{HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD}}
         - AdGuard Home (Origin):
