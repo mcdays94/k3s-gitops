@@ -5,69 +5,33 @@ metadata:
   namespace: homepage-public
 data:
   settings.yaml: |
-    title: Homelab Dashboard
+    title: Miguel's Homelab
     theme: dark
     color: slate
     headerStyle: boxed
-    target: _blank
+    target: _self
     disableHostValidation: true
     layout:
-      - Cluster Services:
-          style: row
-          columns: 3
       - Infrastructure:
           style: row
           columns: 3
       - Monitoring:
           style: row
-          columns: 3
-      - Docker Hosts:
-          style: row
           columns: 2
-      - External Services:
-          style: row
-          columns: 4
 
   services.yaml: |
-    - Cluster Services:
-        - Portainer:
-            icon: si-portainer
-            href: http://10.10.10.200:9000
-            description: Kubernetes Management
-            widget:
-              type: portainer
-              url: http://10.10.10.200:9000
-              env: 1
-              kubernetes: true
-              key: {{HOMEPAGE_VAR_PORTAINER_K3S_KEY}}
-        - ArgoCD:
-            icon: si-argo
-            href: http://10.10.10.204
-            description: GitOps Continuous Deployment
-            widget:
-              type: argocd
-              url: https://10.10.10.204
-              key: {{HOMEPAGE_VAR_ARGOCD_KEY}}
-        - pgAdmin:
-            icon: pgadmin.png
-            href: http://10.10.10.203
-            description: PostgreSQL Management
-
     - Infrastructure:
         - AdGuard Home (K3s):
             icon: adguard-home.png
-            href: http://10.10.10.205
             description: DNS Filtering (Cluster)
             widget:
               type: adguard
               url: http://10.10.10.205
               username: {{HOMEPAGE_VAR_ADGUARD_K3S_USERNAME}}
               password: {{HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD}}
-        - AdGuard Home (Proxmox Ubuntu Server VM):
+        - AdGuard Home (Origin):
             icon: adguard-home.png
-            href: http://10.10.10.79
-            description: DNS Filtering (Origin)
-            ping: http://10.10.10.79
+            description: DNS Filtering (Backup)
             widget:
               type: adguard
               url: http://10.10.10.79
@@ -75,9 +39,7 @@ data:
               password: {{HOMEPAGE_VAR_ADGUARD_ORIGIN_PASSWORD}}
         - AdGuard Home (Pi4):
             icon: adguard-home.png
-            href: http://10.10.10.23
             description: DNS Filtering (Pi4)
-            ping: http://10.10.10.23
             widget:
               type: adguard
               url: http://10.10.10.23
@@ -85,59 +47,16 @@ data:
               password: {{HOMEPAGE_VAR_ADGUARD_PI4_PASSWORD}}
 
     - Monitoring:
-        - Grafana:
-            icon: grafana.png
-            href: http://10.10.10.201
-            description: Metrics & Dashboards
-            widget:
-              type: grafana
-              url: http://10.10.10.201
-              username: {{HOMEPAGE_VAR_GRAFANA_USERNAME}}
-              password: {{HOMEPAGE_VAR_GRAFANA_PASSWORD}}
         - Uptime Kuma:
             icon: uptime-kuma.png
-            href: http://10.10.10.202:3001
             description: Service Monitoring
             widget:
               type: uptimekuma
               url: http://10.10.10.202:3001
               slug: default
-        - Prometheus:
-            icon: prometheus.png
-            href: http://10.10.10.201/explore
-            description: Metrics Collection (via Grafana)
-            widget:
-              type: prometheus
-              url: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
-
-    - Docker Hosts:
-        - Portainer (Pi4):
-            icon: si-portainer
-            href: https://10.10.10.23:9443
-            description: Pi4 Docker Management
-            ping: https://10.10.10.23:9443
-            widget:
-              type: portainer
-              url: https://10.10.10.23:9443
-              env: 2
-              key: {{HOMEPAGE_VAR_PORTAINER_PI4_KEY}}
-        - Portainer (Ubuntu VM):
-            icon: si-portainer
-            href: https://10.10.10.79:9443
-            description: Proxmox VM Docker Management
-            ping: https://10.10.10.79:9443
-            widget:
-              type: portainer
-              url: https://10.10.10.79:9443
-              env: 3
-              key: {{HOMEPAGE_VAR_PORTAINER_UBUNTU_KEY}}
-
-    - External Services:
-        - Home Assistant:
+        - Home Power:
             icon: home-assistant.png
-            href: http://10.10.10.189:8123
-            description: Home Automation
-            ping: http://10.10.10.189:8123
+            description: Homelab Power Consumption
             widget:
               type: homeassistant
               url: http://10.10.10.189:8123
@@ -146,37 +65,6 @@ data:
                 - state: sensor.smartplughomelab_power
                   label: homelab power
                   value: "{state} W"
-                - state: sensor.blue_pure_max_pm_2_5
-                  label: air quality
-                  value: "{state} µg/m³"
-                - template: "{{ states.light | selectattr('state', 'equalto', 'on') | list | length }}"
-                  label: lights on
-        - UniFi Gateway:
-            icon: unifi.png
-            href: https://10.10.10.1
-            description: Network Gateway
-            ping: https://10.10.10.1
-            widget:
-              type: unifi
-              url: https://10.10.10.1
-              username: {{HOMEPAGE_VAR_UNIFI_USERNAME}}
-              password: {{HOMEPAGE_VAR_UNIFI_PASSWORD}}
-        - Proxmox:
-            icon: proxmox
-            href: https://10.10.10.96:8006
-            description: Virtualization Platform
-            ping: https://10.10.10.96:8006
-            widget:
-              type: proxmox
-              url: https://10.10.10.96:8006
-              username: {{HOMEPAGE_VAR_PROXMOX_USERNAME}}
-              password: {{HOMEPAGE_VAR_PROXMOX_PASSWORD}}
-              node: proxmoxldn
-        - Personal Blog:
-            icon: mdi-post
-            href: https://mdias.info
-            description: mdias.info
-            ping: https://mdias.info
 
   widgets.yaml: |
     - kubernetes:
@@ -192,39 +80,29 @@ data:
           memory: true
           showLabel: true
 
-    - glances:
-        url: http://10.10.10.96:61208
-        version: 3
-        metric: info
-        refreshInterval: 5000
-        label: "Proxmox"
-
-    - glances:
-        url: http://10.10.10.23:61208
-        version: 3
-        metric: info
-        refreshInterval: 5000
-        label: "Pi4"
-
-    - search:
-        provider: google
-        target: _blank
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: short
 
   bookmarks.yaml: |
-    - Documentation:
-        - GitHub Repo:
-            - icon: github.png
-              href: https://github.com/mcdays94/k3s-gitops
-        - Operations Guide:
-            - icon: mdi-file-document
-              href: https://github.com/mcdays94/k3s-gitops/blob/main/OPERATIONS.md
-        - GitOps Workflow:
-            - icon: mdi-file-document
-              href: https://github.com/mcdays94/k3s-gitops/blob/main/GITOPS-WORKFLOW.md
+    - Links:
+        - Blog:
+            - icon: mdi-post
+              href: https://mdias.info
+              abbr: mdias.info
 
   docker.yaml: ""
   proxmox.yaml: ""
   custom.css: |
+    /* Remove all hyperlinks */
+    .service-card a, .service-title a {
+      pointer-events: none !important;
+      cursor: default !important;
+      text-decoration: none !important;
+    }
+    
     /* Frosted Glass Theme */
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -255,21 +133,6 @@ data:
       backdrop-filter: blur(15px) !important;
       -webkit-backdrop-filter: blur(15px) !important;
       border-radius: 12px !important;
-    }
-    
-    /* Custom icons for widgets using pseudo-elements */
-    /* Proxmox widget */
-    [class*="widget"]:has([class*="label"]:contains("Proxmox"))::before {
-      content: "🖥️";
-      font-size: 24px;
-      margin-right: 8px;
-    }
-    
-    /* Pi4 widget */
-    [class*="widget"]:has([class*="label"]:contains("Pi4"))::before {
-      content: "🥧";
-      font-size: 24px;
-      margin-right: 8px;
     }
     
     /* Enhance text readability on glass */
