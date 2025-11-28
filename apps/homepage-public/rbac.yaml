@@ -7,7 +7,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: homepage
+  name: homepage-public
 rules:
   - apiGroups:
       - ""
@@ -38,11 +38,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: homepage
+  name: homepage-public
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: homepage
+  name: homepage-public
 subjects:
   - kind: ServiceAccount
     name: homepage
