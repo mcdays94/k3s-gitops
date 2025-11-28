@@ -1,0 +1,154 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage-public
+  namespace: homepage-public
+  labels:
+    app: homepage-public
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage-public
+  labels:
+    app: homepage-public
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage-public
+  labels:
+    app: homepage-public
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage-public
+subjects:
+  - kind: ServiceAccount
+    name: homepage-public
+    namespace: homepage-public
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage-public
+  namespace: homepage-public
+  labels:
+    app: homepage-public
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage-public
+  template:
+    metadata:
+      labels:
+        app: homepage-public
+    spec:
+      serviceAccountName: homepage-public
+      containers:
+      - name: homepage
+        image: ghcr.io/gethomepage/homepage:latest
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "Europe/Lisbon"
+        - name: HOMEPAGE_VAR_TITLE
+          value: "Miguel's Homelab"
+        - name: LOG_TARGETS
+          value: "stdout"
+        - name: HOMEPAGE_CONFIG_FILE
+          value: "/app/config/settings.yaml"
+        - name: HOMEPAGE_ALLOWED_HOSTS
+          value: "homelab.mdias.info,10.10.10.210"
+        # Use secrets from homepage-public namespace (will be copied)
+        - name: HOMEPAGE_VAR_ADGUARD_K3S_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: k3s-username
+        - name: HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: k3s-password
+        - name: HOMEPAGE_VAR_ADGUARD_ORIGIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: origin-username
+        - name: HOMEPAGE_VAR_ADGUARD_ORIGIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: origin-password
+        - name: HOMEPAGE_VAR_ADGUARD_PI4_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: pi4-username
+        - name: HOMEPAGE_VAR_ADGUARD_PI4_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: adguard-creds
+              key: pi4-password
+        - name: HOMEPAGE_VAR_HOMEASSISTANT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: homeassistant-creds
+              key: key
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        - name: logs
+          mountPath: /app/config/logs
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+      - name: config
+        configMap:
+          name: homepage-public-config
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage-public
+  namespace: homepage-public
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 10.10.10.210
+  selector:
+    app: homepage-public
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http

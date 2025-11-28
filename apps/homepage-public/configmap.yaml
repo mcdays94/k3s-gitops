@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-public-config
+  namespace: homepage-public
+data:
+  settings.yaml: |
+    title: Miguel's Homelab
+    theme: dark
+    color: slate
+    headerStyle: boxed
+    target: _self
+    disableHostValidation: true
+    layout:
+      - Cluster Stats:
+          style: row
+          columns: 2
+      - Network Services:
+          style: row
+          columns: 3
+      - Monitoring:
+          style: row
+          columns: 2
+
+  services.yaml: |
+    - Cluster Stats:
+        - Kubernetes Cluster:
+            icon: si-kubernetes
+            description: K3s HA Cluster (3 nodes)
+        - Uptime Kuma:
+            icon: uptime-kuma.png
+            description: Service Monitoring
+            widget:
+              type: uptimekuma
+              url: http://uptime-kuma.uptime-kuma.svc.cluster.local:3001
+              slug: default
+
+    - Network Services:
+        - AdGuard Home (K3s):
+            icon: adguard-home.png
+            description: DNS Filtering (Cluster)
+            widget:
+              type: adguard
+              url: http://adguard-home-web.adguard-home.svc.cluster.local
+              username: {{HOMEPAGE_VAR_ADGUARD_K3S_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_K3S_PASSWORD}}
+        - AdGuard Home (Origin):
+            icon: adguard-home.png
+            description: DNS Filtering (Backup)
+            ping: http://10.10.10.79
+            widget:
+              type: adguard
+              url: http://10.10.10.79
+              username: {{HOMEPAGE_VAR_ADGUARD_ORIGIN_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_ORIGIN_PASSWORD}}
+        - AdGuard Home (Pi4):
+            icon: adguard-home.png
+            description: DNS Filtering (Pi4)
+            ping: http://10.10.10.23
+            widget:
+              type: adguard
+              url: http://10.10.10.23
+              username: {{HOMEPAGE_VAR_ADGUARD_PI4_USERNAME}}
+              password: {{HOMEPAGE_VAR_ADGUARD_PI4_PASSWORD}}
+
+    - Monitoring:
+        - Home Power:
+            icon: home-assistant.png
+            description: Homelab Power Consumption
+            widget:
+              type: homeassistant
+              url: http://10.10.10.189:8123
+              key: {{HOMEPAGE_VAR_HOMEASSISTANT_KEY}}
+              custom:
+                - state: sensor.smartplughomelab_power
+                  label: homelab power
+                  value: "{state} W"
+        - Blog:
+            icon: mdi-post
+            description: Return to mdias.info
+            ping: https://mdias.info
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "K3s Cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: short
+
+  bookmarks.yaml: |
+    - Links:
+        - Blog:
+            - icon: mdi-post
+              href: https://mdias.info
+              abbr: Blog
+        - GitHub:
+            - icon: github.png
+              href: https://github.com/mcdays94
+              abbr: GH
+
+  docker.yaml: ""
+  kubernetes.yaml: |
+    mode: cluster
+
+  custom.css: |
+    /* Custom styling to match mdias.info */
+    /* This will be customized to match your blog's theme */
+    
+    /* Base styling */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    }
+    
+    /* Remove all href links - make cards non-clickable */
+    .service-card a {
+      pointer-events: none !important;
+      cursor: default !important;
+    }
+    
+    /* Hide service links but keep widget functionality */
+    .service-title a {
+      pointer-events: none !important;
+      text-decoration: none !important;
+      cursor: default !important;
+    }
+    
+    /* Style adjustments for public view */
+    .service-card {
+      transition: transform 0.2s ease;
+    }
+    
+    .service-card:hover {
+      transform: none !important;
+    }
+
+  custom.js: |
+    // Remove all clickable links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remove href from all service cards
+      document.querySelectorAll('.service-card a, .service-title a').forEach(function(link) {
+        link.removeAttribute('href');
+        link.style.cursor = 'default';
+        link.style.pointerEvents = 'none';
+      });
+      
+      // Keep only the "Blog" bookmark functional
+      document.querySelectorAll('.bookmark a').forEach(function(link) {
+        if (!link.href.includes('mdias.info')) {
+          link.removeAttribute('href');
+          link.style.cursor = 'default';
+          link.style.pointerEvents = 'none';
+        }
+      });
+    });
