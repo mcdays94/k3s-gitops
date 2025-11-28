@@ -1,69 +1,21 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: homepage-public
-  namespace: homepage-public
-  labels:
-    app: homepage-public
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: homepage-public
-  labels:
-    app: homepage-public
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - namespaces
-      - pods
-      - nodes
-    verbs:
-      - get
-      - list
-  - apiGroups:
-      - metrics.k8s.io
-    resources:
-      - nodes
-      - pods
-    verbs:
-      - get
-      - list
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: homepage-public
-  labels:
-    app: homepage-public
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: homepage-public
-subjects:
-  - kind: ServiceAccount
-    name: homepage-public
-    namespace: homepage-public
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: homepage-public
+  name: homepage
   namespace: homepage-public
   labels:
-    app: homepage-public
+    app: homepage
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: homepage-public
+      app: homepage
   template:
     metadata:
       labels:
-        app: homepage-public
+        app: homepage
     spec:
-      serviceAccountName: homepage-public
+      serviceAccountName: homepage
       containers:
       - name: homepage
         image: ghcr.io/gethomepage/homepage:latest
@@ -75,14 +27,15 @@ spec:
         - name: TZ
           value: "Europe/Lisbon"
         - name: HOMEPAGE_VAR_TITLE
-          value: "Miguel's Homelab"
+          value: "Homelab Dashboard"
+        - name: HOMEPAGE_VAR_SEARCH_PROVIDER
+          value: "google"
         - name: LOG_TARGETS
           value: "stdout"
         - name: HOMEPAGE_CONFIG_FILE
           value: "/app/config/settings.yaml"
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "homelab.mdias.info,10.10.10.210"
-        # Use secrets from homepage-public namespace (will be copied)
+          value: "10.10.10.210,homelab.mdias.info"
         - name: HOMEPAGE_VAR_ADGUARD_K3S_USERNAME
           valueFrom:
             secretKeyRef:
@@ -113,11 +66,61 @@ spec:
             secretKeyRef:
               name: adguard-creds
               key: pi4-password
+        - name: HOMEPAGE_VAR_UNIFI_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: unifi-creds
+              key: username
+        - name: HOMEPAGE_VAR_UNIFI_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: unifi-creds
+              key: password
+        - name: HOMEPAGE_VAR_ARGOCD_KEY
+          valueFrom:
+            secretKeyRef:
+              name: argocd-creds
+              key: key
+        - name: HOMEPAGE_VAR_PORTAINER_K3S_KEY
+          valueFrom:
+            secretKeyRef:
+              name: portainer-keys
+              key: k3s-key
+        - name: HOMEPAGE_VAR_PORTAINER_PI4_KEY
+          valueFrom:
+            secretKeyRef:
+              name: portainer-keys
+              key: pi4-key
+        - name: HOMEPAGE_VAR_PORTAINER_UBUNTU_KEY
+          valueFrom:
+            secretKeyRef:
+              name: portainer-keys
+              key: ubuntu-key
+        - name: HOMEPAGE_VAR_PROXMOX_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: proxmox-creds
+              key: username
+        - name: HOMEPAGE_VAR_PROXMOX_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: proxmox-creds
+              key: password
         - name: HOMEPAGE_VAR_HOMEASSISTANT_KEY
           valueFrom:
             secretKeyRef:
               name: homeassistant-creds
               key: key
+        - name: HOMEPAGE_VAR_GRAFANA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: grafana-creds
+              key: username
+        - name: HOMEPAGE_VAR_GRAFANA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-creds
+              key: password
         volumeMounts:
         - name: config
           mountPath: /app/config
@@ -133,7 +136,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: homepage-public-config
+          name: homepage-config
       - name: logs
         emptyDir: {}
 ---
@@ -146,7 +149,7 @@ spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.210
   selector:
-    app: homepage-public
+    app: homepage
   ports:
   - port: 80
     targetPort: 3000
