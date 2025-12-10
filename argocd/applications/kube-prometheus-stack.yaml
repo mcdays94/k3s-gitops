@@ -13,7 +13,8 @@ spec:
       valuesObject:
         prometheus:
           prometheusSpec:
-            retention: 30d
+            retention: 7d
+            retentionSize: 5GB
             storageSpec:
               volumeClaimTemplate:
                 spec:
@@ -21,7 +22,7 @@ spec:
                   accessModes: ["ReadWriteMany"]
                   resources:
                     requests:
-                      storage: 50Gi
+                      storage: 10Gi
                   selector:
                     matchLabels:
                       app: prometheus
