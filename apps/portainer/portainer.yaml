@@ -81,6 +81,8 @@ kind: Service
 metadata:
   name: portainer
   namespace: portainer
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.200"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.200

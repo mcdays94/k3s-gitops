@@ -61,6 +61,8 @@ kind: Service
 metadata:
   name: pgadmin
   namespace: pgadmin
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.203"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.203

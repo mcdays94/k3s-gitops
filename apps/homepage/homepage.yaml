@@ -145,6 +145,8 @@ kind: Service
 metadata:
   name: homepage
   namespace: homepage
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.208"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.208

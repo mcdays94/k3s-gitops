@@ -145,6 +145,8 @@ kind: Service
 metadata:
   name: homepage-public
   namespace: homepage-public
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.210"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.210

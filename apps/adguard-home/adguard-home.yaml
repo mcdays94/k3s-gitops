@@ -125,6 +125,8 @@ kind: Service
 metadata:
   name: adguard-home-web
   namespace: adguard-home
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.205"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.205
@@ -146,6 +148,8 @@ kind: Service
 metadata:
   name: adguard-home-dns-tcp
   namespace: adguard-home
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.206"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.206
@@ -162,6 +166,8 @@ kind: Service
 metadata:
   name: adguard-home-dns-udp
   namespace: adguard-home
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.209"
 spec:
   type: LoadBalancer
   loadBalancerIP: 10.10.10.209
