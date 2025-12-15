@@ -29,7 +29,6 @@ spec:
         grafana:
           service:
             type: LoadBalancer
-            loadBalancerIP: 10.10.10.201
             annotations:
               metallb.universe.tf/loadBalancerIPs: "10.10.10.201"
           persistence:
