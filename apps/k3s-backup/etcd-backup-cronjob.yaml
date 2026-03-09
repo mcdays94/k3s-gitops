@@ -1,0 +1,122 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: etcd-backup-script
+  namespace: k3s-backup
+data:
+  backup.sh: |
+    #!/bin/sh
+    set -e
+
+    SNAPSHOT_DIR="/snapshots"
+    DATE=$(date +%Y-%m-%d)
+    ENDPOINT="https://9993650612175c36066a397a94466033.r2.cloudflarestorage.com"
+    BUCKET="r2-backups"
+    PREFIX="k3s-etcd-snapshots"
+
+    # Find the latest etcd snapshot
+    LATEST=$(ls -t ${SNAPSHOT_DIR}/etcd-snapshot-* 2>/dev/null | head -1)
+
+    if [ -z "$LATEST" ]; then
+      echo "ERROR: No etcd snapshot found in ${SNAPSHOT_DIR}"
+      exit 1
+    fi
+
+    FILENAME=$(basename "$LATEST")
+    echo "Uploading snapshot: ${FILENAME} ($(du -h "$LATEST" | cut -f1))"
+
+    # Upload to R2 using curl with AWS Signature V4
+    curl -sf -X PUT \
+      "${ENDPOINT}/${BUCKET}/${PREFIX}/${DATE}-${FILENAME}" \
+      --aws-sigv4 "aws:amz:auto:s3" \
+      --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" \
+      --upload-file "$LATEST"
+
+    echo "Uploaded to ${PREFIX}/${DATE}-${FILENAME}"
+
+    # Clean up old snapshots in R2 (keep last 4)
+    echo "Listing existing snapshots in R2..."
+    RESPONSE=$(curl -sf -X GET \
+      "${ENDPOINT}/${BUCKET}?list-type=2&prefix=${PREFIX}/&max-keys=100" \
+      --aws-sigv4 "aws:amz:auto:s3" \
+      --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}")
+
+    # Parse keys and delete old ones (keep last 4)
+    KEYS=$(echo "$RESPONSE" | grep -oP '<Key>[^<]+</Key>' | sed 's/<Key>//;s/<\/Key>//' | sort -r)
+    COUNT=0
+    for KEY in $KEYS; do
+      COUNT=$((COUNT + 1))
+      if [ $COUNT -gt 4 ]; then
+        echo "Deleting old snapshot: $KEY"
+        curl -sf -X DELETE \
+          "${ENDPOINT}/${BUCKET}/${KEY}" \
+          --aws-sigv4 "aws:amz:auto:s3" \
+          --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}" || true
+      fi
+    done
+
+    echo "etcd backup complete"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: etcd-snapshot-backup
+  namespace: k3s-backup
+spec:
+  schedule: "0 3 * * 0"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          nodeSelector:
+            node-role.kubernetes.io/control-plane: "true"
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+            - key: node-role.kubernetes.io/etcd
+              operator: Exists
+              effect: NoSchedule
+          restartPolicy: OnFailure
+          containers:
+            - name: etcd-backup
+              image: curlimages/curl:latest
+              command: ["/bin/sh", "/scripts/backup.sh"]
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: r2-credentials
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: r2-credentials
+                      key: aws-secret-access-key
+              volumeMounts:
+                - name: etcd-snapshots
+                  mountPath: /snapshots
+                  readOnly: true
+                - name: script
+                  mountPath: /scripts
+                  readOnly: true
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "25m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "250m"
+          volumes:
+            - name: etcd-snapshots
+              hostPath:
+                path: /var/lib/rancher/k3s/server/db/snapshots
+                type: Directory
+            - name: script
+              configMap:
+                name: etcd-backup-script
+                defaultMode: 0755
