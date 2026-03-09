@@ -82,15 +82,6 @@ spec:
       labels:
         app: uptime-kuma
     spec:
-      initContainers:
-      - name: init-status-page
-        image: louislam/uptime-kuma:latest
-        command: ['sh', '/scripts/init-status-page.sh']
-        volumeMounts:
-        - name: data
-          mountPath: /app/data
-        - name: init-script
-          mountPath: /scripts
       containers:
       - name: uptime-kuma
         image: louislam/uptime-kuma:latest
@@ -125,10 +116,6 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: uptime-kuma-pvc
-      - name: init-script
-        configMap:
-          name: uptime-kuma-init-script
-          defaultMode: 0755
 ---
 apiVersion: v1
 kind: Service
