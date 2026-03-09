@@ -1,36 +1,15 @@
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: uptime-kuma-nfs-pv
-  labels:
-    app: uptime-kuma
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteMany
-  nfs:
-    server: 10.10.10.70
-    path: /srv/nfs/uptime-kuma
-  mountOptions:
-    - nfsvers=4.1
-    - hard
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: uptime-kuma-pvc
   namespace: uptime-kuma
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: ""
+    - ReadWriteOnce
+  storageClassName: local-path
   resources:
     requests:
       storage: 5Gi
-  selector:
-    matchLabels:
-      app: uptime-kuma
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -104,12 +83,6 @@ spec:
         app: uptime-kuma
     spec:
       initContainers:
-      - name: wait-for-nfs
-        image: busybox:latest
-        command: ['sh', '-c', 'until [ -d /app/data ] && [ -w /app/data ]; do echo "Waiting for NFS mount..."; sleep 5; done; echo "NFS mount ready!"']
-        volumeMounts:
-        - name: data
-          mountPath: /app/data
       - name: init-status-page
         image: louislam/uptime-kuma:latest
         command: ['sh', '/scripts/init-status-page.sh']

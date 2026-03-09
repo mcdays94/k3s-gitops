@@ -1,15 +1,4 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: kube-prometheus-stack-grafana
-  namespace: monitoring
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: ""
-  selector:
-    matchLabels:
-      app: grafana
+# Grafana PVC is now managed by the kube-prometheus-stack Helm chart
+# using local-path storageClass. This file is kept for reference.
+#
+# Previous manually-created PVC with NFS selector has been removed.

@@ -18,14 +18,11 @@ spec:
             storageSpec:
               volumeClaimTemplate:
                 spec:
-                  storageClassName: ""
-                  accessModes: ["ReadWriteMany"]
+                  storageClassName: local-path
+                  accessModes: ["ReadWriteOnce"]
                   resources:
                     requests:
                       storage: 10Gi
-                  selector:
-                    matchLabels:
-                      app: prometheus
         grafana:
           service:
             type: LoadBalancer
@@ -34,12 +31,9 @@ spec:
           persistence:
             enabled: true
             size: 1Gi
-            storageClassName: ""
+            storageClassName: local-path
             accessModes:
-              - ReadWriteMany
-            selector:
-              matchLabels:
-                app: grafana
+              - ReadWriteOnce
         prometheusOperator:
           admissionWebhooks:
             enabled: false
@@ -66,9 +60,4 @@ spec:
       kind: Service
       jsonPointers:
         - /status/loadBalancer/ingress
-    - group: ""
-      kind: PersistentVolumeClaim
-      name: kube-prometheus-stack-grafana
-      namespace: monitoring
-      jsonPointers:
-        - /spec/selector
+

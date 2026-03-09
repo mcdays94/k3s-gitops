@@ -1,41 +1,5 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: prometheus-nfs-pv
-  labels:
-    app: prometheus
-spec:
-  capacity:
-    storage: 50Gi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
-  nfs:
-    server: 10.10.10.70
-    path: /srv/nfs/prometheus
-  mountOptions:
-    - nfsvers=4
-    - hard
-    - timeo=600
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: grafana-nfs-pv
-  labels:
-    app: grafana
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
-  nfs:
-    server: 10.10.10.70
-    path: /srv/nfs/grafana
-  mountOptions:
-    - nfsvers=4
-    - hard
-    - timeo=600
+# Prometheus and Grafana now use local-path storage (storageClassName defined in Helm values).
+# This file is kept for reference but no longer creates NFS PersistentVolumes.
+#
+# Previous NFS PVs for prometheus and grafana on 10.10.10.70 have been removed.
+# Storage is now dynamically provisioned by the local-path-provisioner.
