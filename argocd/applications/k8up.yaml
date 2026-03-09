@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k8up
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://k8up-io.github.io/k8up
+    targetRevision: 4.8.6
+    chart: k8up
+    helm:
+      valuesObject:
+        k8up:
+          envVars:
+            - name: BACKUP_GLOBALS3ENDPOINT
+              value: "https://9993650612175c36066a397a94466033.r2.cloudflarestorage.com"
+            - name: BACKUP_GLOBALS3BUCKET
+              value: "r2-backups"
+            - name: BACKUP_GLOBALACCESSKEYID
+              valueFrom:
+                secretKeyRef:
+                  name: r2-credentials
+                  key: aws-access-key-id
+            - name: BACKUP_GLOBALSECRETACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: r2-credentials
+                  key: aws-secret-access-key
+            - name: BACKUP_GLOBALREPOPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: r2-credentials
+                  key: restic-repo-password
+          skipWithoutAnnotation: false
+          timezone: "Europe/London"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: k3s-backup
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

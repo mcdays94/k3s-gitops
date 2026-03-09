@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: k3s-backup
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mcdays94/k3s-gitops
+    targetRevision: main
+    path: apps/k3s-backup
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: k3s-backup
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
