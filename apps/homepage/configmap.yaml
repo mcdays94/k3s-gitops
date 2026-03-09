@@ -14,7 +14,7 @@ data:
     layout:
       - Cluster Services:
           style: row
-          columns: 4
+          columns: 5
       - Infrastructure:
           style: row
           columns: 3
@@ -56,6 +56,10 @@ data:
             icon: mdi-fingerprint
             href: https://pocketid.lusostreams.com
             description: OIDC Identity Provider
+        - Headlamp:
+            icon: mdi-lighthouse
+            href: http://10.10.10.211
+            description: Kubernetes Dashboard
 
     - Infrastructure:
         - AdGuard Home (K3s):

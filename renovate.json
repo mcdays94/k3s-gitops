@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "automerge": false,
+  "labels": ["renovate", "dependencies"],
+  "prHourlyLimit": 5,
+  "prConcurrentLimit": 10,
+  "timezone": "Europe/London",
+  "schedule": ["before 9am on Monday"],
+  "kubernetes": {
+    "fileMatch": [
+      "apps/.+\\.ya?ml$",
+      "infrastructure/.+\\.ya?ml$",
+      "argocd/.+\\.ya?ml$"
+    ]
+  },
+  "argocd": {
+    "fileMatch": [
+      "argocd/applications/.+\\.ya?ml$"
+    ]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["argocd/bootstrap/kustomization\\.ya?ml$"],
+      "matchStrings": [
+        "https://raw\\.githubusercontent\\.com/argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"
+      ],
+      "depNameTemplate": "argoproj/argo-cd",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^(?<version>.+)$"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Pin Docker images that use :latest tag",
+      "matchDatasources": ["docker"],
+      "matchCurrentValue": "latest",
+      "pinDigests": false,
+      "replacementVersion": true
+    },
+    {
+      "description": "Group all Helm chart updates",
+      "matchDatasources": ["helm"],
+      "groupName": "helm-charts"
+    },
+    {
+      "description": "Group ArgoCD updates",
+      "matchPackageNames": ["argoproj/argo-cd"],
+      "groupName": "argocd"
+    }
+  ]
+}
