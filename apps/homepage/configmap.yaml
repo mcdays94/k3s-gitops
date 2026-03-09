@@ -14,7 +14,7 @@ data:
     layout:
       - Cluster Services:
           style: row
-          columns: 3
+          columns: 4
       - Infrastructure:
           style: row
           columns: 3
@@ -52,6 +52,10 @@ data:
             icon: pgadmin.png
             href: http://10.10.10.203
             description: PostgreSQL Management
+        - Pocket ID:
+            icon: mdi-fingerprint
+            href: https://pocketid.lusostreams.com
+            description: OIDC Identity Provider
 
     - Infrastructure:
         - AdGuard Home (K3s):
