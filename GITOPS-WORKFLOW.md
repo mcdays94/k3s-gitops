@@ -498,12 +498,15 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 ### Important URLs
 
-- **ArgoCD UI**: http://10.10.10.204
+- **ArgoCD UI**: https://10.10.10.204
 - **Grafana**: http://10.10.10.201
 - **Portainer**: http://10.10.10.200:9000
 - **Uptime Kuma**: http://10.10.10.202:3001
 - **pgAdmin**: http://10.10.10.203
-- **AdGuard Home**: http://10.10.10.207
+- **AdGuard Home**: http://10.10.10.205
+- **Pocket ID**: http://10.10.10.207 (external: https://pocketid.lusostreams.com)
+- **Homepage**: http://10.10.10.208
+- **Homepage Public**: http://10.10.10.210
 - **GitHub Repo**: https://github.com/mcdays94/k3s-gitops
 
 ---

@@ -2,160 +2,134 @@
 
 This document lists all secrets required for the cluster and how to recreate them.
 
-## 🔐 Required Secrets
+## How Secrets Work
+
+All secrets are managed using **Sealed Secrets**. Plain secrets are encrypted with `kubeseal` and committed to Git as `SealedSecret` resources. The Sealed Secrets controller (`sealed-secrets-controller` in `kube-system`) decrypts them in-cluster.
+
+**Encrypt a secret:**
+```bash
+kubectl create secret generic my-secret \
+  --from-literal=key=value \
+  --namespace=my-namespace \
+  --dry-run=client -o yaml | \
+  kubeseal --controller-name=sealed-secrets-controller \
+  --controller-namespace=kube-system -o yaml > sealed-secret.yaml
+```
+
+---
+
+## Required Secrets
 
 ### 1. Cloudflare Tunnel Token
 
 **Namespace:** `cloudflare-tunnel`
+**Sealed Secret:** `infrastructure/cloudflare-tunnel/sealed-secret.yaml`
 
 ```bash
 kubectl create secret generic tunnel-token \
   --from-literal=token=YOUR_CLOUDFLARE_TUNNEL_TOKEN \
-  -n cloudflare-tunnel
+  -n cloudflare-tunnel \
+  --dry-run=client -o yaml | kubeseal ... > infrastructure/cloudflare-tunnel/sealed-secret.yaml
 ```
 
-**Where to get it:** Cloudflare Zero Trust Dashboard → Access → Tunnels
+**Where to get it:** Cloudflare Zero Trust Dashboard > Access > Tunnels
 
 ---
 
 ### 2. pgAdmin Password
 
 **Namespace:** `pgadmin`
-
-```bash
-kubectl create secret generic pgadmin-secret \
-  --from-literal=password=YOUR_SECURE_PASSWORD \
-  -n pgadmin
-```
-
-**Recommended:** Use a strong random password
+**Sealed Secret:** `apps/pgadmin/sealed-secret.yaml`
 
 ---
 
-### 3. ArgoCD Admin Password
+### 3. Pocket ID Encryption Key
 
-**Namespace:** `argocd`
+**Namespace:** `pocket-id`
+**Sealed Secret:** `apps/pocket-id/sealed-secret.yaml`
 
-**Initial password:** Auto-generated, retrieve with:
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath="{.data.password}" | base64 -d
-```
-
-**Change it:** Via ArgoCD UI or:
-```bash
-argocd account update-password
-```
+Contains the `ENCRYPTION_KEY` used by Pocket ID for encrypting OIDC client secrets.
 
 ---
 
 ### 4. Homepage Widget Credentials
 
-**Namespace:** `homepage`
+**Namespace:** `homepage` (and `homepage-public`)
 
-#### AdGuard Home Credentials (3 instances)
+Multiple sealed secrets for dashboard widget authentication:
 
-```bash
-# Create sealed secret for AdGuard credentials
-kubectl create secret generic adguard-creds -n homepage \
-  --from-literal=k3s-username='YOUR_K3S_USERNAME' \
-  --from-literal=k3s-password='YOUR_K3S_PASSWORD' \
-  --from-literal=origin-username='YOUR_ORIGIN_USERNAME' \
-  --from-literal=origin-password='YOUR_ORIGIN_PASSWORD' \
-  --from-literal=pi4-username='YOUR_PI4_USERNAME' \
-  --from-literal=pi4-password='YOUR_PI4_PASSWORD' \
-  --dry-run=client -o yaml | \
-  kubeseal --controller-name=sealed-secrets-controller \
-  --controller-namespace=kube-system -o yaml > apps/homepage/sealed-secret-adguard.yaml
-```
+| Secret | File | Contents |
+|--------|------|----------|
+| AdGuard creds | `sealed-secret-adguard.yaml` | K3s, Origin, Pi4 AdGuard usernames/passwords |
+| ArgoCD creds | `sealed-secret-argocd.yaml` | ArgoCD API key |
+| Grafana creds | `sealed-secret-grafana.yaml` | Grafana username/password |
+| Home Assistant | `sealed-secret-homeassistant.yaml` | HA long-lived access token |
+| Portainer creds | `sealed-secret-portainer.yaml` | Portainer API keys |
+| Proxmox creds | `sealed-secret-proxmox.yaml` | Proxmox API token |
+| UniFi creds | `sealed-secret-unifi.yaml` | UniFi username/password |
 
-#### UniFi Gateway Credentials
-
-```bash
-# Create sealed secret for UniFi credentials
-kubectl create secret generic unifi-creds -n homepage \
-  --from-literal=username='k3s' \
-  --from-literal=password='YOUR_UNIFI_PASSWORD' \
-  --dry-run=client -o yaml | \
-  kubeseal --controller-name=sealed-secrets-controller \
-  --controller-namespace=kube-system -o yaml > apps/homepage/sealed-secret-unifi.yaml
-```
-
-**Note:** These credentials are used by Homepage dashboard to display stats from AdGuard Home and UniFi Gateway.
+The `homepage-public` namespace has its own copies of these sealed secrets (sealed secrets are namespace-scoped).
 
 ---
 
-## 🔄 Disaster Recovery
+### 5. K8up Backup Secrets
 
-### ✅ Sealed Secrets (ACTIVE)
+**Namespaces:** `k3s-backup` + each app namespace
 
-**Sealed Secrets is now installed!** All secrets are encrypted and stored in Git.
+| Secret | Namespace | Purpose |
+|--------|-----------|---------|
+| `r2-credentials` | `k3s-backup` | Cloudflare R2 S3 access key + secret + restic password |
+| `k8up-s3-credentials` | per-app namespace | R2 access credentials for that namespace's backups |
+| `k8up-repo-password` | per-app namespace | Restic repository password for that namespace's backups |
 
-**What's encrypted:**
-- ✅ Cloudflare Tunnel token → `infrastructure/cloudflare-tunnel/sealed-secret.yaml`
-- ✅ pgAdmin password → `apps/pgadmin/sealed-secret.yaml`
-- ✅ AdGuard Home credentials (3 instances) → `apps/homepage/sealed-secret-adguard.yaml`
-- ✅ UniFi Gateway credentials → `apps/homepage/sealed-secret-unifi.yaml`
-- ✅ ArgoCD admin password → `apps/homepage/sealed-secret-argocd.yaml`
+Sealed secret files are in `apps/k3s-backup/` as individual `.json` files.
 
-**Private Key Backup:**
+---
+
+### 6. ArgoCD Admin Password
+
+**Namespace:** `argocd`
+
+Auto-generated on install. Retrieve with:
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+```
+
+---
+
+## Sealed Secrets Key Backup
+
 The Sealed Secrets private key is backed up at:
-- `sealed-secrets-key-backup.yaml` (in this directory, NOT committed to Git!)
+- `sealed-secrets-key-backup.yaml` (in repo root, **NOT committed to Git** -- gitignored)
 
-**⚠️ IMPORTANT:** Store `sealed-secrets-key-backup.yaml` in a secure location:
-- Password manager (1Password, Bitwarden)
-- Encrypted USB drive
-- Secure cloud storage (encrypted)
+**IMPORTANT:** Store this file in a secure location (password manager, encrypted storage). Without it, you cannot decrypt any sealed secrets if you rebuild the cluster.
 
-**Disaster Recovery Steps:**
-1. Clone Git repo: `git clone https://github.com/mcdays94/k3s-gitops.git`
-2. Install Sealed Secrets controller
-3. Restore private key:
-   ```bash
-   kubectl apply -f sealed-secrets-key-backup.yaml
-   kubectl delete pod -n kube-system -l name=sealed-secrets-controller
-   ```
-4. Apply all manifests: `kubectl apply -f argocd/applications/`
-5. Sealed Secrets controller decrypts everything automatically!
-
-### Option 2: External Secrets Operator (Alternative)
-
-Use external vault (AWS Secrets Manager, HashiCorp Vault, etc.)
+**Restore procedure:**
+```bash
+kubectl apply -f sealed-secrets-key-backup.yaml
+kubectl delete pod -n kube-system -l name=sealed-secrets-controller
+```
 
 ---
 
-## 📝 Secrets Checklist for New Cluster
+## Secrets Checklist for New Cluster
 
 When rebuilding from scratch:
 
-- [ ] Install K3s cluster
-- [ ] Install Sealed Secrets controller
-- [ ] **Restore Sealed Secrets private key** (`sealed-secrets-key-backup.yaml`)
-- [ ] Restart sealed-secrets controller pod
-- [ ] Install ArgoCD
-- [ ] Apply all ArgoCD applications
-- [ ] **All sealed secrets auto-decrypt!** ✨
-  - Cloudflare Tunnel token
-  - pgAdmin password
-  - AdGuard credentials
-  - UniFi credentials
-  - ArgoCD password
+1. Install k3s cluster
+2. Install Sealed Secrets controller
+3. **Restore Sealed Secrets private key** from backup
+4. Restart sealed-secrets controller pod
+5. Install ArgoCD (`kubectl apply -k argocd/bootstrap/`)
+6. Apply all ArgoCD applications (`kubectl apply -f argocd/applications/`)
+7. All sealed secrets auto-decrypt -- no manual secret creation needed
 
 ---
 
-## 🔒 Security Best Practices
+## Security Best Practices
 
 1. **Never commit plain secrets to Git**
-2. **Use strong, unique passwords**
+2. **Backup Sealed Secrets key securely** (password manager)
 3. **Rotate secrets periodically**
-4. **Backup Sealed Secrets key securely**
-5. **Use RBAC to limit secret access**
-6. **Enable audit logging**
-
----
-
-## 📚 Related Documentation
-
-- [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets)
-- [External Secrets Operator](https://external-secrets.io/)
-- [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+4. **Use RBAC to limit secret access**

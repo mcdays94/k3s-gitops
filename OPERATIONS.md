@@ -1,52 +1,51 @@
 # K3s Cluster Operations Guide
 
-This guide covers common operational scenarios, disaster recovery, and maintenance procedures.
+Common operational scenarios, disaster recovery, and maintenance procedures.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Disaster Recovery](#disaster-recovery)
 2. [Power Management](#power-management)
-3. [Database Maintenance](#database-maintenance)
-4. [Backup Procedures](#backup-procedures)
-5. [Troubleshooting](#troubleshooting)
+3. [Backup & Restore](#backup--restore)
+4. [Troubleshooting](#troubleshooting)
+5. [Quick Reference](#quick-reference)
 
 ---
 
-## 🚨 Disaster Recovery
+## Disaster Recovery
 
 ### Scenario 1: Complete Cluster Rebuild (GitOps from Scratch)
 
-**When:** A change broke the cluster and you need to rebuild everything.
+**When:** Cluster is unrecoverable and needs full rebuild.
 
 **Prerequisites:**
-- ✅ Access to GitHub repo: https://github.com/mcdays94/k3s-gitops
-- ✅ Sealed Secrets private key backup (from Bitwarden)
-- ✅ PostgreSQL VM is running (10.10.10.70)
+- Access to GitHub repo: https://github.com/mcdays94/k3s-gitops
+- Sealed Secrets private key backup (`sealed-secrets-key-backup.yaml`)
 
 **Steps:**
 
-#### 1. Rebuild K3s Cluster (if needed)
+#### 1. Rebuild K3s Cluster
 
-If nodes are intact but K3s is broken:
 ```bash
-# On master node (10.10.10.71)
+# On master node (10.10.10.71, user: mdias)
 sudo systemctl stop k3s
 sudo /usr/local/bin/k3s-uninstall.sh
 
-# Reinstall K3s with external database
+# Reinstall K3s with embedded etcd
 curl -sfL https://get.k3s.io | sh -s - server \
-  --datastore-endpoint="postgres://k3s:your-password@10.10.10.70:5432/k3s" \
+  --cluster-init \
   --disable=traefik \
+  --disable=servicelb \
   --write-kubeconfig-mode=644
 
-# On worker nodes (10.10.10.72, 10.10.10.73)
+# Get the node token for workers
+sudo cat /var/lib/rancher/k3s/server/node-token
+
+# On worker nodes (10.10.10.72 and 10.10.10.73, user: mdias)
 sudo systemctl stop k3s-agent
 sudo /usr/local/bin/k3s-agent-uninstall.sh
-
-# Get token from master
-sudo cat /var/lib/rancher/k3s/server/node-token
 
 # Reinstall agent
 curl -sfL https://get.k3s.io | K3S_URL=https://10.10.10.71:6443 \
@@ -69,361 +68,200 @@ kubectl apply -f infrastructure/metallb/ipaddresspool.yaml
 kubectl apply -f infrastructure/metallb/l2advertisement.yaml
 ```
 
-#### 3. Install ArgoCD
-
-```bash
-# Create namespace
-kubectl create namespace argocd
-
-# Install ArgoCD
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# Patch service to LoadBalancer
-kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
-
-# Wait for LoadBalancer IP
-kubectl get svc argocd-server -n argocd -w
-
-# Get initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-```
-
-#### 4. Install Sealed Secrets Controller
+#### 3. Install Sealed Secrets + Restore Key
 
 ```bash
 # Install controller
 kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.27.1/controller.yaml
 
-# Wait for controller to be ready
+# Wait for controller
 kubectl wait --for=condition=ready pod -n kube-system -l name=sealed-secrets-controller --timeout=90s
-```
 
-#### 5. Restore Sealed Secrets Private Key
-
-**CRITICAL:** This must be done before deploying applications!
-
-```bash
-# Get the backup from Bitwarden (sealed-secrets-key-backup.yaml)
-# Copy it to your local machine
-
-# Apply the backup to restore the private key
+# Restore private key (CRITICAL -- must be done before deploying apps)
 kubectl apply -f sealed-secrets-key-backup.yaml
 
-# Restart the controller to pick up the key
+# Restart controller to pick up the key
 kubectl rollout restart deployment sealed-secrets-controller -n kube-system
-
-# Verify the key is loaded
-kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key
 ```
 
-#### 6. Deploy All Applications via ArgoCD
+#### 4. Install ArgoCD + Deploy All Applications
 
 ```bash
 # Clone the repo
 git clone https://github.com/mcdays94/k3s-gitops.git
 cd k3s-gitops
 
-# Apply all ArgoCD applications
+# Install ArgoCD
+kubectl apply -k argocd/bootstrap/
+kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s
+
+# Deploy all applications
 kubectl apply -f argocd/applications/
 
 # Watch applications sync
 kubectl get applications -n argocd -w
 ```
 
-#### 7. Verify Everything
+#### 5. Post-Deploy Manual Steps
 
 ```bash
-# Check all applications are healthy
+# Create prometheus admission TLS secret (Helm hook not executed by ArgoCD)
+# Generate self-signed cert:
+openssl req -x509 -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt \
+  -days 3650 -nodes -subj '/CN=kube-prometheus-stack-admission'
+
+kubectl create secret generic kube-prometheus-stack-admission \
+  -n monitoring \
+  --from-file=cert=/tmp/tls.crt \
+  --from-file=key=/tmp/tls.key \
+  --from-file=tls-ca.crt=/tmp/tls.crt
+
+rm /tmp/tls.key /tmp/tls.crt
+
+# Verify all apps are healthy
 kubectl get applications -n argocd
-
-# Check all pods are running
 kubectl get pods -A
-
-# Check all LoadBalancer IPs are assigned
 kubectl get svc -A | grep LoadBalancer
-
-# Test services
-curl http://10.10.10.200:9000  # Portainer
-curl http://10.10.10.201       # Grafana
-curl http://10.10.10.202:3001  # Uptime Kuma
-curl http://10.10.10.203       # pgAdmin
-curl http://10.10.10.204       # ArgoCD
-curl http://10.10.10.207       # AdGuard Home
 ```
 
-**Total time:** ~15-20 minutes ⏱️
+**Total time:** ~15-20 minutes
 
 ---
 
 ### Scenario 2: Rollback a Bad Change
 
-**When:** You pushed a change that broke an application.
-
 **Option A: Git Revert (Recommended)**
 ```bash
 cd /Users/miguelcaetanodias/Documents/Projects/k3s-gitops
-
-# View recent commits
 git log --oneline -10
-
-# Revert the bad commit
 git revert <commit-hash>
 git push
-
 # ArgoCD will auto-sync within 3 minutes
 ```
 
-**Option B: Manual Rollback in ArgoCD**
-```bash
-# Via CLI
-argocd app rollback <app-name> <revision>
-
-# Via UI
-# Go to http://10.10.10.204
-# Select application → History → Rollback
-```
-
-**Option C: Quick Fix**
-```bash
-# Edit the file locally
-vim apps/<app-name>/<file>.yaml
-
-# Commit and push
-git add .
-git commit -m "Fix: revert bad change"
-git push
-
-# Force sync if needed
-argocd app sync <app-name>
-```
+**Option B: ArgoCD History**
+- Go to https://10.10.10.204
+- Select application > History > Rollback
 
 ---
 
-## 🔌 Power Management
+## Power Management
 
-### Scenario 1: Powering Down All Cluster Nodes
-
-**When:** Rearranging hardware, moving equipment, etc.
+### Powering Down All Cluster Nodes
 
 **Safe Shutdown Procedure:**
 
-#### Step 1: Drain Nodes (Optional, for graceful shutdown)
 ```bash
-# Drain worker nodes first
-kubectl drain k3s-worker1 --ignore-daemonsets --delete-emptydir-data
-kubectl drain k3s-worker2 --ignore-daemonsets --delete-emptydir-data
+# 1. (Optional) Drain worker nodes for graceful pod termination
+kubectl drain k3s-worker-01 --ignore-daemonsets --delete-emptydir-data --timeout=300s
+kubectl drain k3s-worker-02 --ignore-daemonsets --delete-emptydir-data --timeout=300s
 
-# Wait for pods to migrate
-kubectl get pods -A
+# 2. Shutdown workers first, then master
+ssh mdias@10.10.10.72 "sudo shutdown -h now"
+ssh mdias@10.10.10.73 "sudo shutdown -h now"
+# Wait 30 seconds
+ssh mdias@10.10.10.71 "sudo shutdown -h now"
 ```
-
-#### Step 2: Shutdown Nodes
-```bash
-# Shutdown workers first
-ssh ubuntu@10.10.10.72 "sudo shutdown -h now"
-ssh ubuntu@10.10.10.73 "sudo shutdown -h now"
-
-# Wait 30 seconds, then shutdown master
-ssh ubuntu@10.10.10.71 "sudo shutdown -h now"
-```
-
-#### Step 3: Power Off
-- Physically unplug or use power switch
-- Wait at least 30 seconds before moving
 
 ### Powering Back Up
 
-**Startup Procedure:**
+1. Power on master first (10.10.10.71), wait 2-3 minutes
+2. Power on workers (10.10.10.72, 10.10.10.73)
+3. Verify:
 
-#### Step 1: Power On Nodes
-- Power on master first (10.10.10.71)
-- Wait 2-3 minutes for it to fully boot
-- Power on workers (10.10.10.72, 10.10.10.73)
-
-#### Step 2: Verify Cluster
 ```bash
-# Check nodes are ready
 kubectl get nodes
-
 # Should show:
-# NAME            STATUS   ROLES                  AGE   VERSION
-# k3s-master-01   Ready    control-plane,master   Xd    v1.x.x
-# k3s-master-02   Ready    control-plane,master   Xd    v1.x.x
-# k3s-master-03   Ready    control-plane,master   Xd    v1.x.x
-```
+# k3s-master-01   Ready   control-plane,etcd,master
+# k3s-worker-01   Ready   <none>
+# k3s-worker-02   Ready   <none>
 
-#### Step 3: Uncordon Nodes (if drained)
-```bash
-kubectl uncordon k3s-worker1
-kubectl uncordon k3s-worker2
-```
-
-#### Step 4: Verify Applications
-```bash
-# Check all pods are running
-kubectl get pods -A
-
-# Check ArgoCD applications
 kubectl get applications -n argocd
-
-# Test services
-curl http://10.10.10.200:9000  # Portainer
-```
-
-**What to Expect:**
-- ✅ Cluster will resume automatically
-- ✅ All pods will restart
-- ✅ LoadBalancer IPs will be reassigned
-- ✅ ArgoCD will reconcile any drift
-- ⏱️ Full recovery: 5-10 minutes
-
-**Potential Issues:**
-- Pods stuck in `Pending`: Check node resources
-- Pods stuck in `CrashLoopBackOff`: Check logs with `kubectl logs`
-- LoadBalancer IPs not assigned: Check MetalLB pods
-
----
-
-## 🗄️ Database Maintenance
-
-### Scenario: Rebooting Proxmox/PostgreSQL VM
-
-**When:** Proxmox host reboot, VM maintenance, updates.
-
-**What Happens:**
-
-#### During Reboot:
-1. **K3s cluster loses database connection**
-   - API server continues to run (uses local cache)
-   - Existing pods keep running
-   - **Cannot create/modify resources** until DB is back
-
-2. **Applications keep running**
-   - All pods continue to serve traffic
-   - LoadBalancer IPs remain active
-   - No service interruption for end users
-
-3. **What breaks temporarily:**
-   - ❌ `kubectl` commands fail (API server can't write)
-   - ❌ ArgoCD can't sync changes
-   - ❌ New pods can't be scheduled
-   - ❌ Scaling operations fail
-
-#### After Reboot:
-1. **PostgreSQL VM comes back online**
-2. **K3s reconnects automatically** (within 30 seconds)
-3. **Everything resumes normal operation**
-4. **ArgoCD reconciles any missed changes**
-
-**Safe Reboot Procedure:**
-
-```bash
-# 1. Check cluster is healthy before reboot
-kubectl get nodes
 kubectl get pods -A
-
-# 2. Reboot Proxmox/VM
-# (via Proxmox UI or SSH)
-
-# 3. Wait for PostgreSQL to come back
-# Test connection from master node
-ssh ubuntu@10.10.10.71
-psql -h 10.10.10.70 -U k3s -d k3s -c "SELECT 1;"
-
-# 4. Verify K3s reconnected
-kubectl get nodes
-# If this works, you're good!
-
-# 5. Check for any issues
-kubectl get pods -A | grep -v Running
 ```
 
-**Recovery Time:**
-- PostgreSQL startup: ~30-60 seconds
-- K3s reconnection: ~30 seconds
-- Total downtime for management: ~1-2 minutes
-- **User-facing services: 0 downtime** ✅
+**What to expect:**
+- Cluster resumes automatically (k3s service is `enabled` on all nodes)
+- All pods restart (`restartPolicy: Always`)
+- MetalLB reassigns LoadBalancer IPs
+- ArgoCD reconciles any drift (self-heal enabled)
+- Full recovery: 5-10 minutes
 
-**Best Practices:**
-- ✅ Reboot during low-traffic hours
-- ✅ Announce maintenance window
-- ✅ Monitor cluster after reboot
-- ✅ Keep PostgreSQL VM backed up
-
----
-
-## 💾 Backup Procedures
-
-### What to Backup
-
-#### 1. Sealed Secrets Private Key (CRITICAL)
-- **Location:** `sealed-secrets-key-backup.yaml`
-- **Backup to:** Bitwarden (already done ✅)
-- **Frequency:** Once (doesn't change)
-- **Why:** Without this, you can't decrypt secrets
-
-#### 2. Git Repository
-- **Location:** https://github.com/mcdays94/k3s-gitops
-- **Backup to:** GitHub (already done ✅)
-- **Frequency:** Every commit
-- **Why:** Single source of truth for cluster config
-
-#### 3. PostgreSQL Database
-- **What:** K3s cluster state
-- **How:** Automated backups on Proxmox VM
-- **Frequency:** Daily
-- **Why:** Cluster recovery without rebuilding
-
-**PostgreSQL Backup Script:**
+If nodes were drained:
 ```bash
-# On PostgreSQL VM (10.10.10.70)
-#!/bin/bash
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/var/backups/postgresql"
-mkdir -p $BACKUP_DIR
-
-# Backup K3s database
-pg_dump -U k3s k3s | gzip > $BACKUP_DIR/k3s-backup-$DATE.sql.gz
-
-# Keep last 7 days
-find $BACKUP_DIR -name "k3s-backup-*.sql.gz" -mtime +7 -delete
-```
-
-#### 4. Application Data (Optional)
-- **Prometheus data:** NFS mount (already on PostgreSQL VM)
-- **Uptime Kuma data:** PVC (stored on nodes)
-- **pgAdmin data:** PVC (stored on nodes)
-- **AdGuard Home data:** PVC (stored on nodes)
-
-**PVC Backup (if needed):**
-```bash
-# List PVCs
-kubectl get pvc -A
-
-# Backup a PVC (example: Uptime Kuma)
-kubectl exec -n uptime-kuma <pod-name> -- tar czf - /app/data > uptime-kuma-backup.tar.gz
+kubectl uncordon k3s-worker-01
+kubectl uncordon k3s-worker-02
 ```
 
 ---
 
-## 🔧 Troubleshooting
+## Backup & Restore
 
-### Common Issues
+### Automated Backups (K8up to Cloudflare R2)
 
-#### Issue 1: Pod Stuck in Pending
+Weekly PVC backups run every Sunday via K8up Schedule CRs:
+
+| Time (UTC) | Namespace | What |
+|------------|-----------|------|
+| 02:00 | pocket-id | Pocket ID database + uploads |
+| 02:10 | uptime-kuma | Uptime Kuma SQLite DB |
+| 02:20 | monitoring | Grafana DB + Prometheus data |
+| 02:30 | adguard-home | AdGuard config + work dirs |
+| 02:40 | portainer | Portainer data |
+| 02:50 | pgadmin | pgAdmin config |
+| 03:00 | k3s-backup | etcd snapshot upload (CronJob) |
+
+Prune at 04:xx, Check at 05:xx (Sundays).
+
+Backups go to Cloudflare R2 bucket `r2-backups` using Restic (encrypted, incremental).
+
+### Manual Backup
+
 ```bash
-# Check why
+# Trigger a one-off backup for a namespace
+kubectl apply -f - <<EOF
+apiVersion: k8up.io/v1
+kind: Backup
+metadata:
+  name: manual-backup
+  namespace: <namespace>
+spec:
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+EOF
+
+# Check status
+kubectl get backup -n <namespace>
+```
+
+### etcd Snapshot Backup
+
+The `etcd-snapshot-backup` CronJob uploads the latest etcd snapshot to R2 under the `k3s-etcd-snapshots/` prefix. To trigger manually:
+
+```bash
+kubectl create job etcd-manual --from=cronjob/etcd-snapshot-backup -n k3s-backup
+kubectl logs -l job-name=etcd-manual -n k3s-backup
+kubectl delete job etcd-manual -n k3s-backup
+```
+
+### What to Backup Externally
+
+| Item | Location | Notes |
+|------|----------|-------|
+| Sealed Secrets key | `sealed-secrets-key-backup.yaml` | Store in password manager. Without this, secrets cannot be decrypted on rebuild. |
+| Git repo | GitHub | Already remote. Consider local clone as additional backup. |
+
+---
+
+## Troubleshooting
+
+### Pod Stuck in Pending
+```bash
 kubectl describe pod <pod-name> -n <namespace>
-
-# Common causes:
-# - Insufficient resources
-# - PVC not bound
-# - Node selector mismatch
-
-# Fix: Scale down other pods or add resources
+# Common causes: insufficient resources, PVC not bound, node selector mismatch
 ```
 
-#### Issue 2: ArgoCD Application OutOfSync
+### ArgoCD Application OutOfSync
 ```bash
 # Check diff
 argocd app diff <app-name>
@@ -431,119 +269,92 @@ argocd app diff <app-name>
 # Force sync
 argocd app sync <app-name> --force
 
-# Or delete and recreate
-kubectl delete application <app-name> -n argocd
-kubectl apply -f argocd/applications/<app-name>.yaml
+# Or hard refresh
+kubectl patch app <app-name> -n argocd --type merge \
+  -p '{"metadata":{"annotations":{"argocd.argoproj.io/refresh":"hard"}}}'
 ```
 
-#### Issue 3: LoadBalancer IP Not Assigned
+### LoadBalancer IP Not Assigned
 ```bash
-# Check MetalLB
 kubectl get pods -n metallb-system
-
-# Check IP pool
 kubectl get ipaddresspool -n metallb-system
-
-# Check L2 advertisement
 kubectl get l2advertisement -n metallb-system
-
-# Restart MetalLB if needed
 kubectl rollout restart deployment controller -n metallb-system
 ```
 
-#### Issue 4: Sealed Secret Not Decrypting
+### Sealed Secret Not Decrypting
 ```bash
-# Check controller is running
 kubectl get pods -n kube-system -l name=sealed-secrets-controller
-
-# Check logs
 kubectl logs -n kube-system -l name=sealed-secrets-controller
-
-# Verify private key is loaded
 kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key
 
-# If missing, restore from backup
+# If key missing, restore from backup
 kubectl apply -f sealed-secrets-key-backup.yaml
 kubectl rollout restart deployment sealed-secrets-controller -n kube-system
 ```
 
-#### Issue 5: Node Not Ready
+### Node Not Ready
 ```bash
-# Check node status
 kubectl describe node <node-name>
 
-# Check K3s service
-ssh ubuntu@<node-ip> "sudo systemctl status k3s"
-# or for worker:
-ssh ubuntu@<node-ip> "sudo systemctl status k3s-agent"
-
-# Restart K3s
-ssh ubuntu@<node-ip> "sudo systemctl restart k3s"
-# or for worker:
-ssh ubuntu@<node-ip> "sudo systemctl restart k3s-agent"
+# On the node (user: mdias):
+ssh mdias@<node-ip> "sudo systemctl status k3s"        # master
+ssh mdias@<node-ip> "sudo systemctl status k3s-agent"   # worker
+ssh mdias@<node-ip> "sudo systemctl restart k3s-agent"  # restart if needed
 ```
 
 ---
 
-## 📞 Emergency Contacts & Resources
+## Quick Reference
 
-### Quick Reference
+### Cluster Nodes
 
-**Cluster IPs:**
-- Control-Plane 1 (k3s-master-01): 10.10.10.71
-- Control-Plane 2 (k3s-master-02): 10.10.10.72
-- Control-Plane 3 (k3s-master-03): 10.10.10.73
-- PostgreSQL (Shared Datastore): 10.10.10.70
+| Node | IP | Role |
+|------|-----|------|
+| k3s-master-01 | 10.10.10.71 | Control-plane + etcd |
+| k3s-worker-01 | 10.10.10.72 | Worker |
+| k3s-worker-02 | 10.10.10.73 | Worker |
 
-**Service IPs:**
-- Portainer: 10.10.10.200:9000
-- Grafana: 10.10.10.201
-- Uptime Kuma: 10.10.10.202:3001
-- pgAdmin: 10.10.10.203
-- ArgoCD: 10.10.10.204
-- AdGuard Home: 10.10.10.207
+SSH user: `mdias` on all nodes.
 
-**Important Files:**
-- Sealed Secrets Key: Bitwarden
-- Git Repo: https://github.com/mcdays94/k3s-gitops
-- Documentation: `/Users/miguelcaetanodias/Documents/Projects/k3s-rpi-cluster/`
+### Service IPs
+
+| Service | IP | Port |
+|---------|-----|------|
+| Portainer | 10.10.10.200 | 9000 |
+| Grafana | 10.10.10.201 | 80 |
+| Uptime Kuma | 10.10.10.202 | 3001 |
+| pgAdmin | 10.10.10.203 | 80 |
+| ArgoCD | 10.10.10.204 | 443 |
+| AdGuard Home (Web) | 10.10.10.205 | 80 |
+| AdGuard DNS (TCP) | 10.10.10.206 | 53 |
+| Pocket ID | 10.10.10.207 | 80 |
+| Homepage | 10.10.10.208 | 80 |
+| AdGuard DNS (UDP) | 10.10.10.209 | 53 |
+| Homepage Public | 10.10.10.210 | 80 |
 
 ### Useful Commands
 
 ```bash
-# Check cluster health
+# Cluster health
 kubectl get nodes
 kubectl get pods -A
 kubectl get applications -n argocd
 
-# Check resource usage
+# Resource usage
 kubectl top nodes
 kubectl top pods -A
 
-# View logs
-kubectl logs <pod-name> -n <namespace>
-kubectl logs <pod-name> -n <namespace> --previous  # Previous crash
+# ArgoCD password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 
-# Force sync all applications
+# Force sync all apps
 for app in $(kubectl get applications -n argocd -o name); do
   argocd app sync $(basename $app)
 done
-
-# Emergency: Delete and recreate application
-kubectl delete application <app-name> -n argocd
-kubectl apply -f argocd/applications/<app-name>.yaml
 ```
 
----
+### Key Files
 
-## 🎯 Summary
-
-**Key Takeaways:**
-
-1. **Disaster Recovery:** 15-20 minutes to rebuild from Git + Sealed Secrets backup
-2. **Power Cycling:** Safe to power off/on, cluster resumes automatically in 5-10 minutes
-3. **Database Reboots:** No user-facing downtime, management plane down for 1-2 minutes
-4. **Backups:** Sealed Secrets key (Bitwarden) + Git repo = full recovery
-5. **GitOps:** Everything in Git, ArgoCD reconciles automatically
-
-**You're well protected!** 🛡️
+- Sealed Secrets Key: password manager (not in repo)
+- Git Repo: https://github.com/mcdays94/k3s-gitops
