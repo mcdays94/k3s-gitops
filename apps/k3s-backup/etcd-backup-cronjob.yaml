@@ -43,7 +43,7 @@ data:
       --user "${AWS_ACCESS_KEY_ID}:${AWS_SECRET_ACCESS_KEY}")
 
     # Parse keys and delete old ones (keep last 4)
-    KEYS=$(echo "$RESPONSE" | grep -oP '<Key>[^<]+</Key>' | sed 's/<Key>//;s/<\/Key>//' | sort -r)
+    KEYS=$(echo "$RESPONSE" | grep -o '<Key>[^<]*</Key>' | sed 's/<Key>//;s/<\/Key>//' | sort -r)
     COUNT=0
     for KEY in $KEYS; do
       COUNT=$((COUNT + 1))
@@ -82,6 +82,8 @@ spec:
               operator: Exists
               effect: NoSchedule
           restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 0
           containers:
             - name: etcd-backup
               image: curlimages/curl:latest
