@@ -49,11 +49,11 @@ Congratulations! Your K3s Raspberry Pi cluster is now fully configured with GitO
 ```bash
 # ArgoCD (GitOps management)
 open http://10.10.10.204
-# Login: admin / h9vab3RFdv6Xmggk
+# Login: admin / <retrieve with: kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d>
 
 # Grafana (Monitoring)
 open http://10.10.10.201
-# Login: admin / admin
+# Login: admin / <change on first login>
 
 # Portainer (K8s management)
 open http://10.10.10.200:9000
@@ -63,7 +63,7 @@ open http://10.10.10.202:3001
 
 # pgAdmin (Database admin)
 open http://10.10.10.203
-# Login: admin@admin.com / admin
+# Login: <see sealed secret for credentials>
 
 # AdGuard Home (DNS filtering)
 open http://10.10.10.205

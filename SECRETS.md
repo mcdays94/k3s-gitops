@@ -58,11 +58,11 @@ argocd account update-password
 ```bash
 # Create sealed secret for AdGuard credentials
 kubectl create secret generic adguard-creds -n homepage \
-  --from-literal=k3s-username='adguardhomek3s' \
+  --from-literal=k3s-username='YOUR_K3S_USERNAME' \
   --from-literal=k3s-password='YOUR_K3S_PASSWORD' \
-  --from-literal=origin-username='amd' \
+  --from-literal=origin-username='YOUR_ORIGIN_USERNAME' \
   --from-literal=origin-password='YOUR_ORIGIN_PASSWORD' \
-  --from-literal=pi4-username='adguardhomepi' \
+  --from-literal=pi4-username='YOUR_PI4_USERNAME' \
   --from-literal=pi4-password='YOUR_PI4_PASSWORD' \
   --dry-run=client -o yaml | \
   kubeseal --controller-name=sealed-secrets-controller \

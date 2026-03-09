@@ -59,7 +59,7 @@ This guide explains how to work with your GitOps-managed K3s cluster.
 **Via ArgoCD UI:**
 ```bash
 open http://10.10.10.204
-# Login: admin / h9vab3RFdv6Xmggk
+# Login: admin / <see SECRETS.md for how to retrieve>
 ```
 
 **Via kubectl:**
