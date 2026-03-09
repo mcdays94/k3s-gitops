@@ -139,7 +139,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.202"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.202
   selector:
     app: uptime-kuma
   ports:

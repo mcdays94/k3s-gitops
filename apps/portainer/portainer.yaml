@@ -64,7 +64,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.200"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.200
   selector:
     app: portainer
   ports:

@@ -17,9 +17,6 @@ patches:
         path: /spec/type
         value: LoadBalancer
       - op: add
-        path: /spec/loadBalancerIP
-        value: 10.10.10.204
-      - op: add
         path: /metadata/annotations
         value:
           metallb.universe.tf/loadBalancerIPs: "10.10.10.204"

@@ -65,7 +65,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.203"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.203
   selector:
     app: pgadmin
   ports:

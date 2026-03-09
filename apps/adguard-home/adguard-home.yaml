@@ -87,7 +87,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.205"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.205
   selector:
     app: adguard-home
   ports:
@@ -110,7 +109,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.206"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.206
   selector:
     app: adguard-home
   ports:
@@ -128,7 +126,6 @@ metadata:
     metallb.universe.tf/loadBalancerIPs: "10.10.10.209"
 spec:
   type: LoadBalancer
-  loadBalancerIP: 10.10.10.209
   selector:
     app: adguard-home
   ports:
