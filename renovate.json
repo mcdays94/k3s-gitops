@@ -12,8 +12,7 @@
   "kubernetes": {
     "fileMatch": [
       "apps/.+\\.ya?ml$",
-      "infrastructure/.+\\.ya?ml$",
-      "argocd/.+\\.ya?ml$"
+      "infrastructure/.+\\.ya?ml$"
     ]
   },
   "argocd": {
@@ -21,25 +20,18 @@
       "argocd/applications/.+\\.ya?ml$"
     ]
   },
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["argocd/bootstrap/kustomization\\.ya?ml$"],
       "matchStrings": [
         "https://raw\\.githubusercontent\\.com/argoproj/argo-cd/(?<currentValue>v[\\d.]+)/manifests/install\\.yaml"
       ],
       "depNameTemplate": "argoproj/argo-cd",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^(?<version>.+)$"
+      "datasourceTemplate": "github-releases"
     }
   ],
   "packageRules": [
-    {
-      "description": "Pin Docker images that use :latest tag",
-      "matchDatasources": ["docker"],
-      "matchCurrentValue": "latest",
-      "pinDigests": false,
-      "replacementVersion": true
-    },
     {
       "description": "Group all Helm chart updates",
       "matchDatasources": ["helm"],
