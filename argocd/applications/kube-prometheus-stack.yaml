@@ -70,8 +70,8 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
-      - Replace=true
       - SkipDryRunOnMissingResource=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
@@ -83,4 +83,8 @@ spec:
       kind: Service
       jsonPointers:
         - /status/loadBalancer/ingress
+    - group: ""
+      kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec
 
