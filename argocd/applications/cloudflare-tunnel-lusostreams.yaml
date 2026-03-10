@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel-lusostreams
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mcdays94/k3s-gitops
+    targetRevision: main
+    path: infrastructure/cloudflare-tunnel-lusostreams
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-tunnel-lusostreams
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
