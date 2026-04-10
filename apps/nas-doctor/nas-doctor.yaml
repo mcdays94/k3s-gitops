@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nas-doctor-data
+  namespace: nas-doctor
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nas-doctor
+  namespace: nas-doctor
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nas-doctor-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: nas-doctor
+    namespace: nas-doctor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nas-doctor
+  namespace: nas-doctor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nas-doctor
+  template:
+    metadata:
+      labels:
+        app: nas-doctor
+    spec:
+      serviceAccountName: nas-doctor
+      containers:
+        - name: nas-doctor
+          image: ghcr.io/mcdays94/nas-doctor:0.7.0-rc1
+          ports:
+            - containerPort: 8060
+              name: http
+          env:
+            - name: TZ
+              value: Europe/Lisbon
+            - name: NAS_DOCTOR_INTERVAL
+              value: "6h"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8060
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 8060
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: nas-doctor-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nas-doctor
+  namespace: nas-doctor
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: "10.10.10.212"
+spec:
+  type: LoadBalancer
+  selector:
+    app: nas-doctor
+  ports:
+    - port: 8060
+      targetPort: 8060
+      name: http
