@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nas-doctor
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mcdays94/k3s-gitops
+    targetRevision: main
+    path: apps/nas-doctor
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nas-doctor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
