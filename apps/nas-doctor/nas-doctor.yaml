@@ -66,7 +66,7 @@ spec:
       serviceAccountName: nas-doctor
       containers:
         - name: nas-doctor
-          image: ghcr.io/mcdays94/nas-doctor:0.7.0-rc1
+          image: ghcr.io/mcdays94/nas-doctor:0.7.0
           ports:
             - containerPort: 8060
               name: http
@@ -86,14 +86,12 @@ spec:
               memory: "512Mi"
               cpu: "500m"
           livenessProbe:
-            httpGet:
-              path: /api/v1/health
+            tcpSocket:
               port: 8060
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
-            httpGet:
-              path: /api/v1/health
+            tcpSocket:
               port: 8060
             initialDelaySeconds: 5
             periodSeconds: 10
