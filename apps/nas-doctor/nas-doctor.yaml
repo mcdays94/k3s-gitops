@@ -67,6 +67,7 @@ spec:
       containers:
         - name: nas-doctor
           image: ghcr.io/mcdays94/nas-doctor:nightly
+          imagePullPolicy: Always
           ports:
             - containerPort: 8060
               name: http
