@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://k8up-io.github.io/k8up
-    targetRevision: 4.8.6
+    targetRevision: 4.10.0
     chart: k8up
     helm:
       valuesObject:
