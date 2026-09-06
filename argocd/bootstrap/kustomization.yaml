@@ -5,7 +5,7 @@ namespace: argocd
 
 resources:
   - namespace.yaml
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.9.3/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.14.21/manifests/install.yaml
 
 patches:
   # Patch ArgoCD server service to use LoadBalancer with pinned IP
